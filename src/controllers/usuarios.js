@@ -1,7 +1,7 @@
 const pool = require('../connections/conexao')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const senhajwt = require('../jwtkey')
+const jwtkey = require('../jwtkey')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, senha, email } = req.body
@@ -49,7 +49,7 @@ const login = async (req, res) => {
             return res.status(400).json({ mensagem: 'Senha inválida' })
         }
 
-        const token = jwt.sign({ id: usuario.id }, senhajwt, { expiresIn: '8h' })
+        const token = jwt.sign({ id: usuario.id }, jwtkey, { expiresIn: '8h' })
 
         return res.json({
             usuario,
@@ -60,7 +60,12 @@ const login = async (req, res) => {
     }
 }
 
+const DetalharUsuario = async (req, res) => {
+    return res.json(req.usuario)
+}
+
 module.exports = {
     cadastrarUsuario,
-    login
+    login,
+    DetalharUsuario
 }

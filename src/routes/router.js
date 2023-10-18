@@ -1,5 +1,5 @@
 const express = require('express')
-const { cadastrarUsuario, login } = require('../controllers/usuarios')
+const { cadastrarUsuario, login, DetalharUsuario } = require('../controllers/usuarios')
 const verificarLogin = require('../middleware/verificarLogin')
 
 
@@ -9,6 +9,8 @@ rotas.post('/usuario', cadastrarUsuario)
 rotas.post('/login', login)
 
 rotas.use(verificarLogin)
+
+rotas.get('/usuario', DetalharUsuario)
 
 
 module.exports = rotas
