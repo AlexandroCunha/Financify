@@ -1,6 +1,6 @@
 const express = require('express')
-const { cadastrarUsuario, login } = require('./controladores/usuarios')
-const verificarLogin = require('./intermediarios/verificarLogin')
+const { cadastrarUsuario, login } = require('../controllers/usuarios')
+const verificarLogin = require('../middleware/verificarLogin')
 
 
 const rotas = express()

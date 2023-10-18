@@ -1,4 +1,4 @@
-const pool = require('../conexao')
+const pool = require('../connections/conexao')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const senhajwt = require('../jwtkey')
