@@ -1,6 +1,6 @@
-const pool = require('../connections/conexao')
+const pool = require('../conexao')
 const jwt = require('jsonwebtoken')
-const jwtkey = require('../jwtkey')
+const jwtkey = require('../config/jwtkey')
 
 const obterUsuarioLogado = async (req, res, next) => {
     const { authorization } = req.headers
@@ -24,6 +24,6 @@ const obterUsuarioLogado = async (req, res, next) => {
     } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor.' });
     }
-
 }
+
 module.exports = obterUsuarioLogado

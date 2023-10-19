@@ -1,7 +1,7 @@
 const pool = require('../connections/conexao')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const jwtkey = require('../jwtkey')
+const jwtkey = require('../secret/jwtkey')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, senha, email } = req.body
@@ -49,7 +49,7 @@ const login = async (req, res) => {
             return res.status(400).json({ mensagem: 'Senha inválida' })
         }
 
-        const token = jwt.sign({ id: usuario.id }, jwtkey, { expiresIn: '8h' })
+        const token = jwt.sign({ id: usuario.id }, jwtkey, { expiresIn: '30d' })
 
         return res.json({
             usuario,
@@ -60,12 +60,37 @@ const login = async (req, res) => {
     }
 }
 
-const DetalharUsuario = async (req, res) => {
-    return res.json(req.usuario)
+const detalharUsuario = async (req, res) => {
+    const { senha, ...usuario } = req.usuario
+    return res.json(usuario)
 }
+
+const atualizarUsuario = async (req, res) => {
+    const { nome, email, senha } = req.body
+    const { id, nome: nomeUsuario, email: emailUsuario, senha: senhaUsuario } = req.usuario;
+
+    if (!nome || !email || !senha) {
+        return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' })
+    }
+
+    if (senha) {
+        senhaCriptografada = await bcrypt.hash(senha, 10)
+    }
+
+    try {
+        const query = 'UPDATE usuarios SET nome = $1, email = $2, senha = $3 WHERE id = $4';
+        await pool.query(query, [nome, email, senhaCriptografada, id])
+
+        return res.status(204).send()
+    } catch (error) {
+        return res.status(500).json({ mensagem: 'Erro interno do servidor.' })
+    }
+}
+
 
 module.exports = {
     cadastrarUsuario,
     login,
-    DetalharUsuario
+    detalharUsuario,
+    atualizarUsuario
 }
