@@ -2,6 +2,7 @@ const pool = require('../connections/conexao')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const jwtkey = require('../secret/jwtkey')
+const validarDadosParaAtualizarUsuario = require('../middleware/validarDadosParaAtualizarUsuario')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, senha, email } = req.body
@@ -67,22 +68,15 @@ const detalharUsuario = async (req, res) => {
 
 const atualizarUsuario = async (req, res) => {
     const { nome, email, senha } = req.body
-    const { id, nome: nomeUsuario, email: emailUsuario, senha: senhaUsuario } = req.usuario;
-
-    if (!nome || !email || !senha) {
-        return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios.' })
-    }
-
-    if (senha) {
-        senhaCriptografada = await bcrypt.hash(senha, 10)
-    }
+    const { id } = req.usuario
 
     try {
         const query = 'UPDATE usuarios SET nome = $1, email = $2, senha = $3 WHERE id = $4';
-        await pool.query(query, [nome, email, senhaCriptografada, id])
+        await pool.query(query, [nome, email, req.senhaCriptografada, id])
 
         return res.status(204).send()
     } catch (error) {
+        console.log(error.message)
         return res.status(500).json({ mensagem: 'Erro interno do servidor.' })
     }
 }

@@ -4,7 +4,7 @@ CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     nome TEXT,
     email TEXT UNIQUE,
-    senha TEXT NOT NULL
+    senha TEXT 
 );
 
 CREATE TABLE categorias (

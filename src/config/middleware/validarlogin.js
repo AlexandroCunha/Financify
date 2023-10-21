@@ -2,7 +2,7 @@ const pool = require('../connections/conexao')
 const jwt = require('jsonwebtoken')
 const jwtkey = require('../secret/jwtkey')
 
-const verificarLogin = async (req, res, next) => {
+const validarLogin = async (req, res, next) => {
     const { authorization } = req.headers
 
     if (!authorization) {
@@ -29,6 +29,6 @@ const verificarLogin = async (req, res, next) => {
 }
 
 
-module.exports = verificarLogin
+module.exports = validarLogin
 
 
