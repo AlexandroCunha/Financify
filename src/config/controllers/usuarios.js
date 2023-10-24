@@ -2,7 +2,6 @@ const pool = require('../connections/conexao')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const jwtkey = require('../secret/jwtkey')
-const validarDadosParaAtualizarUsuario = require('../middleware/validarDadosParaAtualizarUsuario')
 
 const cadastrarUsuario = async (req, res) => {
     const { nome, senha, email } = req.body
@@ -67,7 +66,7 @@ const detalharUsuario = async (req, res) => {
 }
 
 const atualizarUsuario = async (req, res) => {
-    const { nome, email, senha } = req.body
+    const { nome, email } = req.body
     const { id } = req.usuario
 
     try {
@@ -76,7 +75,19 @@ const atualizarUsuario = async (req, res) => {
 
         return res.status(204).send()
     } catch (error) {
-        console.log(error.message)
+        return res.status(500).json({ mensagem: 'Erro interno do servidor.' })
+    }
+}
+
+const deletarTransacao = async (req, res) => {
+    const { id } = req.params
+
+    try {
+        await pool.query('delete from transacoes where id = $1', [id])
+
+        res.status(204).send()
+
+    } catch (error) {
         return res.status(500).json({ mensagem: 'Erro interno do servidor.' })
     }
 }
@@ -86,5 +97,6 @@ module.exports = {
     cadastrarUsuario,
     login,
     detalharUsuario,
-    atualizarUsuario
+    atualizarUsuario,
+    deletarTransacao
 }

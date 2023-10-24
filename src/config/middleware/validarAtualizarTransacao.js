@@ -15,7 +15,7 @@ const validarDadosParaAtualizarTransacao = async (req, res, next) => {
     }
 
     if (transacaoQuery.rows[0].usuario_id !== idUsuario) {
-        return res.status(403).json({ mensagem: 'Você não tem permissão para acessar esta transação.' })
+        return res.status(403).json({ mensagem: 'Essa transação não existe.' })
     }
 
     if (!descricao || !valor || !data || !categoria_id || !tipo) {
