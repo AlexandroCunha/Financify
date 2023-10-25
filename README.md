@@ -195,7 +195,7 @@ INSERT INTO categorias (descricao) VALUES
 
   Método **GET**
 
-  "**/transacao/extrato**" - Esta funcionalidade extra pode fornecer um extrato detalhado das transações do usuário, incluindo informações como saldo atual, resumo de despesas e receitas, etc.
+  "**/transacao/extrato**" - Esta funcionalidade extra pode fornecer um extrato detalhado das transações do usuário, incluindo informações como resumo de despesas e receitas, etc.
 
 - Filtrar transações por categoria:
 
