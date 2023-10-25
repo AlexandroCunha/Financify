@@ -4,7 +4,7 @@
   "description": "API REST para Gerenciamento de Finanças Pessoais",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./src/index.js"
+    "dev": "nodemon ./src/config/server/index.js"
   },
   "keywords": [],
   "author": "",
