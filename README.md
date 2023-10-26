@@ -1,4 +1,4 @@
-# **Financify API**
+![](https://i.imgur.com/8Yv5svw.png)
 
  ## _Essa API é projetada para ser usada em um sistema de gerenciamento financeiro, aplicativo bancário ou qualquer aplicação que envolva o controle de transações e perfis de usuário._
 
