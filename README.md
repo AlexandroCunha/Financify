@@ -201,4 +201,4 @@ INSERT INTO categorias (descricao) VALUES
 
   Método **GET**
 
-  "**/transacao**" - Este recurso extra permite que os usuários filtrem suas transações com base em categorias específicas. Isso é útil para visualizar despesas e receitas em categorias específicas, como alimentação, transporte, entretenimento, etc.
+  "**/transacoes**" - Este recurso extra permite que os usuários filtrem suas transações com base em categorias específicas. Isso é útil para visualizar despesas e receitas em categorias específicas, como alimentação, transporte, entretenimento, etc.
