@@ -1,6 +1,23 @@
-# **Financy API**
+# **Financify API**
 
- *Essa API é projetada para ser usada em um sistema de gerenciamento financeiro, aplicativo bancário ou qualquer aplicação que envolva o controle de transações e perfis de usuário.*
+ ## Essa API é projetada para ser usada em um sistema de gerenciamento financeiro, aplicativo bancário ou qualquer aplicação que envolva o controle de transações e perfis de usuário.
+
+
+**Imagens**
+
+<table>
+  <tr>
+    <td>
+      <img src="https://i.imgur.com/4qMMrNF.png" alt="" style="width: 100%; height: auto;">
+      <div style="text-align: center;">Funcionalidades no Insomnia</div>
+    </td>
+    <td>
+      <img src="https://i.imgur.com/jdQaayk.png" alt="" style="width: 100%; height: auto;">
+      <div style="text-align: center;">Organização das pastas</div>
+    </td>
+  </tr>
+</table>
+
 
 **Segue a baixo instruções de como executar**
 
@@ -204,4 +221,3 @@ INSERT INTO categorias (descricao) VALUES
   "**/transacoes**" - Este recurso extra permite que os usuários filtrem suas transações com base em categorias específicas. Isso é útil para visualizar despesas e receitas em categorias específicas, como alimentação, transporte, entretenimento, etc.
 
 
-<img src="https://imgur.com/TgmSqT4" alt="Texto alternativo">
