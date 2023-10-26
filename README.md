@@ -19,7 +19,7 @@
 </table>
 
 
-**Segue a baixo instruções de como executar**
+**Segue abaixo instruções de como executar**
 
 
 npm install para instalar pacotes utilizados para construção desta API:
