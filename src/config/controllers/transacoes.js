@@ -78,6 +78,35 @@ const deletarTransacao = async (req, res) => {
     }
 }
 
+const filtrarTransacao = async (req, res) => {
+    const filtros = req.query.filtro;
+    const { id: idUsuario } = req.usuario;
+
+    try {
+        let query = `
+        SELECT transacoes.id, transacoes.tipo, transacoes.descricao, transacoes.valor, transacoes.data, transacoes.usuario_id,
+        categorias.id as categoria_id, categorias.descricao as categoria_nome
+        FROM transacoes
+        JOIN categorias ON transacoes.categoria_id = categorias.id
+        WHERE transacoes.usuario_id = $1`
+
+        const params = [idUsuario]
+
+        if (filtros && filtros.length > 0) {
+            const filtrosPorCategoria = filtros.map((_, index) => `$${index + 2}`).join(', ')
+            query += ` AND categorias.descricao ILIKE ANY(ARRAY[${filtrosPorCategoria}])`
+            params.push(...filtros)
+        }
+
+        const resultado = await pool.query(query, params)
+        const transacoesFiltradas = resultado.rows
+
+        res.status(200).json(transacoesFiltradas)
+    } catch (error) {
+        return res.status(500).json({ mensagem: 'Erro interno do servidor.' })
+    }
+}
+
 const obterExtrato = async (req, res) => {
     try {
         const { id } = req.usuario
@@ -110,5 +139,6 @@ module.exports = {
     detalharTransacao,
     atualizarTransacao,
     deletarTransacao,
-    obterExtrato
+    obterExtrato,
+    filtrarTransacao
 }
