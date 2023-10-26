@@ -1,15 +1,38 @@
 const pool = require("../connections/conexao")
 
 const transacoesDoUsuario = async (req, res) => {
-    const { id } = req.usuario
+    const { id: idUsuario } = req.usuario
+    const filtros = req.query.filtro
 
     try {
-        const query = await pool.query(`
+        let query = await pool.query(`
         select transacoes.*, categorias.descricao as categoria_nome from transacoes join categorias
-        on transacoes.categoria_id = categorias.id where transacoes.usuario_id = $1`, [id])
+        on transacoes.categoria_id = categorias.id where transacoes.usuario_id = $1`, [idUsuario])
+        let transacoesDoUsuario = query.rows
 
-        res.json(query.rows)
+        if (filtros) {
+            query = `
+        SELECT transacoes.id, transacoes.tipo, transacoes.descricao, transacoes.valor, transacoes.data, transacoes.usuario_id,
+        categorias.id as categoria_id, categorias.descricao as categoria_nome
+        FROM transacoes
+        JOIN categorias ON transacoes.categoria_id = categorias.id
+        WHERE transacoes.usuario_id = $1`
+
+            const params = [idUsuario]
+
+            if (filtros && filtros.length > 0) {
+                const filtrosPorCategoria = filtros.map((_, index) => `$${index + 2}`).join(', ')
+                query += ` AND categorias.descricao ILIKE ANY(ARRAY[${filtrosPorCategoria}])`
+                params.push(...filtros)
+            }
+
+            const resultado = await pool.query(query, params)
+            transacoesDoUsuario = resultado.rows
+        }
+
+        res.status(200).json(transacoesDoUsuario)
     } catch (error) {
+        console.log(error.message)
         return res.status(500).json({ mensagem: 'Erro interno do servidor.' })
     }
 }
@@ -78,35 +101,6 @@ const deletarTransacao = async (req, res) => {
     }
 }
 
-const filtrarTransacao = async (req, res) => {
-    const filtros = req.query.filtro;
-    const { id: idUsuario } = req.usuario;
-
-    try {
-        let query = `
-        SELECT transacoes.id, transacoes.tipo, transacoes.descricao, transacoes.valor, transacoes.data, transacoes.usuario_id,
-        categorias.id as categoria_id, categorias.descricao as categoria_nome
-        FROM transacoes
-        JOIN categorias ON transacoes.categoria_id = categorias.id
-        WHERE transacoes.usuario_id = $1`
-
-        const params = [idUsuario]
-
-        if (filtros && filtros.length > 0) {
-            const filtrosPorCategoria = filtros.map((_, index) => `$${index + 2}`).join(', ')
-            query += ` AND categorias.descricao ILIKE ANY(ARRAY[${filtrosPorCategoria}])`
-            params.push(...filtros)
-        }
-
-        const resultado = await pool.query(query, params)
-        const transacoesFiltradas = resultado.rows
-
-        res.status(200).json(transacoesFiltradas)
-    } catch (error) {
-        return res.status(500).json({ mensagem: 'Erro interno do servidor.' })
-    }
-}
-
 const obterExtrato = async (req, res) => {
     try {
         const { id } = req.usuario
@@ -139,6 +133,5 @@ module.exports = {
     detalharTransacao,
     atualizarTransacao,
     deletarTransacao,
-    obterExtrato,
-    filtrarTransacao
+    obterExtrato
 }

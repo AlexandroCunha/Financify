@@ -3,7 +3,7 @@ const express = require('express')
 const validarLogin = require('../middleware/validarlogin')
 const { listarCategorias } = require('../controllers/categorias')
 const { cadastrarUsuario, login, detalharUsuario, atualizarUsuario } = require('../controllers/usuarios')
-const { transacoesDoUsuario, detalharTransacao, cadastrarTransacao, atualizarTransacao, deletarTransacao, obterExtrato, filtrarTransacao } = require('../controllers/transacoes')
+const { transacoesDoUsuario, detalharTransacao, cadastrarTransacao, atualizarTransacao, deletarTransacao, obterExtrato } = require('../controllers/transacoes')
 const { validarDadosParaTransacoes, validarDadosParaAtualizarTransacao, validarDadosParaCadastrarTransacao } = require('../middleware/validarTransacoes')
 const { validarDadosParaAtualizarUsuario, validarDadosParaLogin, validarDadosParaCadastrarUsuario } = require('../middleware/validarUsuario')
 
@@ -25,7 +25,6 @@ rotas.get('/transacao/:id', validarDadosParaTransacoes, detalharTransacao)
 rotas.delete('/transacao/:id', validarDadosParaTransacoes, deletarTransacao)
 rotas.post('/transacao', validarDadosParaCadastrarTransacao, cadastrarTransacao)
 rotas.put('/transacao/:id', validarDadosParaAtualizarTransacao, atualizarTransacao)
-rotas.get('/transacoes', filtrarTransacao)
 
 
 module.exports = rotas
