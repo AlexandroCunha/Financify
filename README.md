@@ -226,14 +226,16 @@ INSERT INTO categorias (descricao) VALUES
 <div style="display: flex; align-items: center;">
   <img src="https://i.imgur.com/UHB40eA.jpg" width="100" height="100" style="margin-right: 20px;">
   <p>
-    Olá! Meu nome é Alexandro Cunha, Tenho 24 anos e sou o autor deste projeto. Estou empolgado por compartilhar esta iniciativa com a comunidade do GitHub.Desde ja quero lhe agradecer por visitar este repositório e por seu interesse neste projeto. Sinta-se à vontade para entrar em contato comigo se tiver alguma dúvida, sugestão ou comentário. Espero que este projeto seja útil para você e para a comunidade!
+    Olá! Meu nome é Alexandro Cunha, Tenho 24 anos e sou o autor deste projeto. Estou empolgado por compartilhar esta iniciativa com a comunidade do GitHub. 
+    
+    Desde ja quero lhe agradecer por visitar este repositório e por seu interesse neste projeto. Sinta-se à vontade para entrar em contato comigo se tiver alguma dúvida, sugestão ou comentário. Espero que este projeto seja útil para você e para a comunidade!
   </p>
 </div>
 
 ### Quem Sou Eu?
 
 Sou licenciado pleno em pedagogia, mas minha paixão por tecnologia e programação me levou a buscar novos horizontes. 
-Atualmente, sou especializado em tecnologias como Node.js, Typescript e Git. Estou comprometido com meu crescimento como desenvolvedor e continuo a aprender e aprimorar minhas habilidades.
+Atualmente, sou especializado em tecnologias como JavaScript, SQL, Express, Node.Js entre outras. Estou comprometido com meu crescimento como desenvolvedor e continuo a aprender e aprimorar minhas habilidades.
 
 ### Contato
 
