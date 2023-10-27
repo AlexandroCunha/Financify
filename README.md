@@ -226,9 +226,7 @@ INSERT INTO categorias (descricao) VALUES
 <div style="display: flex; align-items: center;">
   <img src="https://i.imgur.com/UHB40eA.jpg" width="100" height="100" style="margin-right: 20px;">
   <p>
-    Olá! Meu nome é Alexandro Cunha, Tenho 24 anos e sou o autor deste projeto. Estou empolgado por compartilhar esta iniciativa com a comunidade do GitHub. 
-    
-    Desde ja quero lhe agradecer por visitar este repositório e por seu interesse neste projeto. Sinta-se à vontade para entrar em contato comigo se tiver alguma dúvida, sugestão ou comentário. Espero que este projeto seja útil para você e para a comunidade!
+     Olá! Meu nome é Alexandro Cunha, Tenho 24 anos e sou o autor deste projeto. Estou empolgado por compartilhar esta iniciativa com a comunidade do GitHub. 
   </p>
 </div>
 
@@ -242,3 +240,5 @@ Atualmente, sou especializado em tecnologias como JavaScript, SQL, Express, Node
 [![Gmail](https://img.shields.io/badge/Gmail-c14438?style=for-the-badge&logo=Gmail&logoColor=white)](alexandrocunha4@gmail.com)
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/AlexandroCunha)
 [![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/alexandrocunha/)
+
+Gostaria de lhe agradecer por visitar este repositório e por seu interesse neste projeto. Sinta-se à vontade para entrar em contato comigo se tiver alguma dúvida, sugestão ou comentário. Espero que este projeto seja útil para você e para a comunidade!
