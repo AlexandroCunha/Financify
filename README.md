@@ -237,7 +237,7 @@ Atualmente, sou especializado em tecnologias como JavaScript, SQL, Express, Node
 
 ### Contato
 
-[![Gmail](https://img.shields.io/badge/Gmail-c14438?style=for-the-badge&logo=Gmail&logoColor=white)](alexandrocunha4@gmail.com)
+[![Gmail](https://img.shields.io/badge/-Gmail-c14438?style=for-the-badge&logo=Gmail&logoColor=white&link=mailto:alexandrocunha4@gmail.com)](mailto:alexandrocunha4@gmail.com)
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/AlexandroCunha)
 [![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/alexandrocunha/)
 
