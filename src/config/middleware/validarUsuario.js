@@ -23,6 +23,7 @@ const validarDadosParaCadastrarUsuario = async (req, res, next) => {
 
 const validarDadosParaAtualizarUsuario = async (req, res, next) => {
     const { nome, email, senha } = req.body
+    const { id: usuarioLogado } = req.usuario
 
     try {
         if (!nome || !email || !senha) {
@@ -33,19 +34,18 @@ const validarDadosParaAtualizarUsuario = async (req, res, next) => {
             req.senhaCriptografada = await bcrypt.hash(senha, 10)
         }
 
-
         if (email) {
-            const emailExiste = await pool.query("select * from usuarios where email = $1", [email])
+            const { rowCount, rows } = await pool.query("select * from usuarios where email = $1", [email])
 
-            if (emailExiste.rowCount === 1) {
+            if (rowCount === 1 && rows[0].id !== usuarioLogado) {
                 return res.status(400).json({ mensagem: 'O e-mail informado já está sendo utilizado.' })
             }
         }
+        next()
     } catch (error) {
         return res.status(500).json({ mensagem: 'erro interno do servidor' })
     }
 
-    next()
 }
 
 const validarDadosParaLogin = async (req, res, next) => {
