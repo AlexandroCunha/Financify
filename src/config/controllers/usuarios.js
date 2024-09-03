@@ -57,9 +57,6 @@ const atualizarUsuario = async (req, res) => {
     }
 }
 
-
-
-
 module.exports = {
     cadastrarUsuario,
     login,
