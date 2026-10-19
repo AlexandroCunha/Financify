@@ -1,0 +1,6 @@
+# Fim de linha LF em todos os arquivos de texto, em qualquer sistema operacional.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

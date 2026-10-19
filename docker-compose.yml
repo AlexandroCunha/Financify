@@ -1,0 +1,23 @@
+# PostgreSQL para desenvolvimento local.
+# Subir:  docker compose up -d     Parar:  docker compose down
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: financify-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: financify
+      POSTGRES_PASSWORD: financify
+      POSTGRES_DB: financify
+    ports:
+      - "5433:5432" # 5433 para não conflitar com um PostgreSQL já instalado na máquina
+    volumes:
+      - financify-dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financify -d financify"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  financify-dados:
