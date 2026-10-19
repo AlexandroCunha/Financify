@@ -23,7 +23,23 @@
 
 ## Contents
 
-[Features](#features) · [Tech stack](#tech-stack) · [Quick start](#quick-start) · [Configuration](#configuration) · [API](#api) · [Architecture](#architecture) · [Tests](#tests) · [Contributing](#contributing) · [Roadmap](#roadmap) · [Author](#about-the-author)
+[Screenshots](#screenshots) · [Features](#features) · [Tech stack](#tech-stack) · [Quick start](#quick-start) · [Configuration](#configuration) · [API](#api) · [Architecture](#architecture) · [Tests](#tests) · [Contributing](#contributing) · [Roadmap](#roadmap) · [Author](#about-the-author)
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/painel.png" alt="Dashboard with balance, monthly chart and spending by category" width="720">
+</p>
+
+<details>
+<summary>More screenshots</summary>
+
+<p align="center">
+  <img src="docs/screenshots/transacoes.png" alt="Transactions list with filters and pagination" width="720">
+  <img src="docs/screenshots/nova-transacao.png" alt="New transaction form" width="720">
+</p>
+
+</details>
 
 ## Features
 

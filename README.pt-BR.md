@@ -23,7 +23,23 @@
 
 ## Sumário
 
-[Funcionalidades](#funcionalidades) · [Tecnologias](#tecnologias) · [Início rápido](#início-rápido) · [Configuração](#configuração) · [API](#api) · [Arquitetura](#arquitetura) · [Testes](#testes) · [Como contribuir](#como-contribuir) · [Próximos passos](#próximos-passos) · [Autor](#sobre-o-autor)
+[Capturas](#capturas-de-tela) · [Funcionalidades](#funcionalidades) · [Tecnologias](#tecnologias) · [Início rápido](#início-rápido) · [Configuração](#configuração) · [API](#api) · [Arquitetura](#arquitetura) · [Testes](#testes) · [Como contribuir](#como-contribuir) · [Próximos passos](#próximos-passos) · [Autor](#sobre-o-autor)
+
+## Capturas de tela
+
+<p align="center">
+  <img src="docs/screenshots/painel.png" alt="Painel com saldo, gráfico mensal e gastos por categoria" width="720">
+</p>
+
+<details>
+<summary>Mais capturas</summary>
+
+<p align="center">
+  <img src="docs/screenshots/transacoes.png" alt="Lista de transações com filtros e paginação" width="720">
+  <img src="docs/screenshots/nova-transacao.png" alt="Formulário de nova transação" width="720">
+</p>
+
+</details>
 
 ## Funcionalidades
 
