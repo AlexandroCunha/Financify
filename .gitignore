@@ -1,1 +1,16 @@
-node_modules
+node_modules/
+
+# variáveis de ambiente (segredos)
+.env
+.env.*
+!.env.example
+
+# sistema e editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# logs e cobertura de testes
+*.log
+coverage/
