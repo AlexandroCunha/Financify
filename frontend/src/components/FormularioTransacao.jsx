@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { api } from '../api.js'
-import { centavosParaReais, hoje, reaisParaCentavos } from '../format.js'
+import { centavosParaTexto, hoje, valorParaCentavos } from '../format.js'
 
 export default function FormularioTransacao({ transacao, categorias, aoSalvar, aoCancelar }) {
   const [form, setForm] = useState({
     tipo: transacao?.tipo ?? 'saida',
     descricao: transacao?.descricao ?? '',
-    valor: transacao ? centavosParaReais(transacao.valor) : '',
+    valor: transacao ? centavosParaTexto(transacao.valor) : '',
     data: transacao?.data.slice(0, 10) ?? hoje(),
     categoria_id: transacao?.categoria_id ?? categorias[0]?.id ?? '',
   })
@@ -20,7 +20,7 @@ export default function FormularioTransacao({ transacao, categorias, aoSalvar, a
     e.preventDefault()
     setErro('')
     setErros({})
-    const valor = reaisParaCentavos(form.valor)
+    const valor = valorParaCentavos(form.valor)
     if (!Number.isInteger(valor) || valor < 1) {
       setErros({ valor: 'Informe um valor maior que zero, como 10,50.' })
       return
@@ -59,7 +59,7 @@ export default function FormularioTransacao({ transacao, categorias, aoSalvar, a
         </label>
         <div className="duas-colunas">
           <label>
-            Valor (R$)
+            Valor (€)
             <input required inputMode="decimal" placeholder="0,00" value={form.valor} onChange={mudar('valor')} />
             {erros.valor && <small className="erro-campo">{erros.valor}</small>}
           </label>

@@ -43,7 +43,7 @@ function inteiro({ min = 1, max = 2_147_483_647, aceitarTexto = false } = {}) {
 function valorEmCentavos() {
   const regra = inteiro({ min: 1 })
   return (valor) =>
-    regra(valor).erro ? falha('deve ser um número inteiro maior que zero, em centavos (ex.: 1050 = R$ 10,50)') : ok(valor)
+    regra(valor).erro ? falha('deve ser um número inteiro maior que zero, em centavos (ex.: 1050 = € 10,50)') : ok(valor)
 }
 
 function data() {

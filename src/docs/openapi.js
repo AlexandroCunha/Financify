@@ -32,7 +32,7 @@ module.exports = {
     version,
     description:
       'API REST para controle de finanças pessoais.\n\n' +
-      '- Valores monetários são **inteiros em centavos** (1050 = R$ 10,50).\n' +
+      '- Valores monetários são **inteiros em centavos** (1050 = € 10,50).\n' +
       '- Datas usam o formato **AAAA-MM-DD**.\n\n' +
       'Para testar por aqui: cadastre um usuário, faça login, copie o `token` e clique em **Authorize**.',
   },
