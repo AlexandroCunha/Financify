@@ -34,9 +34,10 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
-      # Endereço do front-end liberado no CORS. Se o Render der outro nome ao front, ajuste aqui.
+      # Endereços liberados no CORS: o front-end e o portfólio (que chama /demo no console "Try the API").
+      # Se o Render der outro nome ao front, ajuste aqui.
       - key: CORS_ORIGIN
-        value: https://financify-web-m2zy.onrender.com
+        value: https://financify-web-m2zy.onrender.com,https://alexandrocunha.github.io
 
   # Front-end (React + Vite): gera frontend/dist e publica como site estático.
   - type: web
