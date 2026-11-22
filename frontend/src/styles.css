@@ -142,3 +142,10 @@ label input, label select { font-weight: 400; }
   .botoes { width: 100%; justify-content: flex-end; }
   .duas-colunas { grid-template-columns: 1fr; }
 }
+
+/* Demonstração: botão na tela de login e aviso dentro do app */
+button.secundario { border-color: var(--marca); color: var(--marca); font-weight: 600; }
+button.secundario:hover:not(:disabled) { background: color-mix(in srgb, var(--marca) 10%, transparent); }
+.auth .demo { display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--borda); }
+.auth .demo small { color: var(--suave); text-align: center; }
+.faixa-demo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin-bottom: 16px; }

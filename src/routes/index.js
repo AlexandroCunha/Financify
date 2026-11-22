@@ -2,11 +2,12 @@ const { Router } = require('express')
 const autenticar = require('../middlewares/autenticar')
 const limitarTentativas = require('../middlewares/limitarTentativas')
 const autenticacao = require('../controllers/autenticacao')
+const demo = require('../controllers/demo')
 const usuarios = require('../controllers/usuarios')
 const categorias = require('../controllers/categorias')
 const transacoes = require('../controllers/transacoes')
 
-function criarRotas({ maxTentativasLogin }) {
+function criarRotas({ maxTentativasLogin, maxContasDemo }) {
   const rotas = Router()
 
   // Públicas
@@ -16,6 +17,13 @@ function criarRotas({ maxTentativasLogin }) {
       : []
   rotas.post('/login', ...limiteDeLogin, autenticacao.login)
   rotas.post('/usuarios', usuarios.cadastrar)
+
+  // Conta de demonstração com dados de exemplo (uma por visitante, apagada em 24 horas)
+  const limiteDeDemo =
+    maxContasDemo > 0
+      ? [limitarTentativas({ maximo: maxContasDemo, mensagem: 'Muitas contas de demonstração criadas. Tente novamente em alguns minutos.' })]
+      : []
+  rotas.post('/demo', ...limiteDeDemo, demo.criar)
 
   // Conta do usuário logado
   rotas.get('/usuarios/me', autenticar, usuarios.detalhar)

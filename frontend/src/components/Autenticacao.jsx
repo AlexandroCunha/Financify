@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { api } from '../api.js'
 
-export default function Autenticacao({ aoEntrar, aviso }) {
-  const [modo, setModo] = useState('login')
+export default function Autenticacao({ aoEntrar, aviso, modoInicial = 'login' }) {
+  const [modo, setModo] = useState(modoInicial)
   const [form, setForm] = useState({ nome: '', email: '', senha: '' })
   const [erro, setErro] = useState('')
   const [erros, setErros] = useState({})
@@ -24,6 +24,19 @@ export default function Autenticacao({ aoEntrar, aviso }) {
     } catch (err) {
       setErro(err.message)
       setErros(err.erros)
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  async function entrarNaDemo() {
+    setErro('')
+    setErros({})
+    setEnviando(true)
+    try {
+      aoEntrar(await api.demo())
+    } catch (err) {
+      setErro(err.message)
     } finally {
       setEnviando(false)
     }
@@ -74,6 +87,15 @@ export default function Autenticacao({ aoEntrar, aviso }) {
         <button type="button" className="link centro" onClick={trocar}>
           {modo === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
         </button>
+
+        {modo === 'login' && (
+          <div className="demo">
+            <button type="button" className="secundario" onClick={entrarNaDemo} disabled={enviando}>
+              Ver demonstração
+            </button>
+            <small>Entra numa conta com dados de exemplo, sem cadastro. Ela é apagada em 24 horas.</small>
+          </div>
+        )}
       </form>
     </div>
   )

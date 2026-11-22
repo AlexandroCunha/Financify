@@ -47,6 +47,7 @@ async function requisitar(metodo, caminho, { corpo, query } = {}) {
 
 export const api = {
   login: (corpo) => requisitar('POST', '/login', { corpo }),
+  demo: () => requisitar('POST', '/demo'),
   cadastrar: (corpo) => requisitar('POST', '/usuarios', { corpo }),
   perfil: () => requisitar('GET', '/usuarios/me'),
   atualizarPerfil: (corpo) => requisitar('PATCH', '/usuarios/me', { corpo }),

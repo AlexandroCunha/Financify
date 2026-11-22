@@ -62,7 +62,8 @@ describe('/usuarios/me', () => {
     const usuario = await h.criarUsuarioLogado()
     const { status, corpo } = await h.api('GET', '/usuarios/me', { token: usuario.token })
     assert.equal(status, 200)
-    assert.deepEqual(Object.keys(corpo).sort(), ['criado_em', 'email', 'id', 'nome'])
+    assert.deepEqual(Object.keys(corpo).sort(), ['criado_em', 'demo', 'email', 'id', 'nome'])
+    assert.equal(corpo.demo, false)
     assert.equal(corpo.id, usuario.id)
   })
 

@@ -9,6 +9,7 @@ process.env.NODE_ENV = 'test'
 process.env.JWT_SECRET = 'segredo-usado-somente-nos-testes-0123456789'
 process.env.CORS_ORIGIN = 'http://localhost:5173'
 process.env.LOGIN_MAX_TENTATIVAS = '0'
+process.env.DEMO_MAX_POR_IP = '0'
 try {
   process.loadEnvFile(path.resolve(__dirname, '../.env'))
 } catch (erro) {
