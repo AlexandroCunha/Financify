@@ -42,7 +42,6 @@ services:
   - type: web
     name: financify-web
     runtime: static
-    region: frankfurt
     branch: feat/v2
     rootDir: frontend
     buildCommand: npm ci && npm run build
