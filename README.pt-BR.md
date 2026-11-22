@@ -29,14 +29,27 @@
 
 ## Capturas de tela
 
+Tiradas no [app publicado](https://financify-web-m2zy.onrender.com/?demo), numa conta de demonstração:
+
 <p align="center">
-  <img src="docs/screenshots/painel.png" alt="Painel de novembro: saldo do mês comparado com outubro, gráfico de barras mês a mês, rosca de gastos por categoria, linha de quanto sobrou em cada mês e últimas transações" width="760">
+  <img src="docs/screenshots/app-painel.png" alt="App publicado: painel de novembro numa conta de demonstração, com o saldo comparado com outubro, barras mês a mês e gastos por categoria" width="760">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/app-transacoes.png" alt="App publicado: transações agrupadas por dia, com filtros e a barra de entradas e saídas do período" width="376">
+  <img src="docs/screenshots/app-nova-transacao.png" alt="App publicado: formulário de nova transação" width="376">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/app-celular.png" alt="App publicado numa tela do tamanho de um celular" width="260">
 </p>
 
 <details>
-<summary>Mais capturas</summary>
+<summary>Mais capturas, geradas a partir do código com dados de exemplo</summary>
 
 <p align="center">
+  <img src="docs/screenshots/painel.png" alt="Painel de novembro: saldo do mês comparado com outubro, gráfico de barras mês a mês, rosca de gastos por categoria, linha de quanto sobrou em cada mês e últimas transações" width="760">
+  <br><br>
   <img src="docs/screenshots/transacoes.png" alt="Transações agrupadas por dia, com filtros e uma cor por categoria" width="760">
   <br><br>
   <img src="docs/screenshots/nova-transacao.png" alt="Formulário de nova transação com a escolha entre saída e entrada e as categorias em botões" width="760">
