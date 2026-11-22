@@ -1,7 +1,7 @@
 const pool = require('../db/pool')
 
 // Colunas que podem sair na resposta (a senha nunca entra aqui).
-const COLUNAS_PUBLICAS = 'id, nome, email, criado_em'
+const COLUNAS_PUBLICAS = 'id, nome, email, demo, criado_em'
 
 async function buscarPorId(id) {
   const { rows } = await pool.query(`SELECT ${COLUNAS_PUBLICAS} FROM usuarios WHERE id = $1`, [id])

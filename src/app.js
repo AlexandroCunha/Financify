@@ -11,6 +11,7 @@ const { version } = require('../package.json')
 // Monta o app sem abrir porta (o server.js faz isso). Assim os testes sobem instâncias próprias.
 function criarApp({
   maxTentativasLogin = config.loginMaxTentativas,
+  maxContasDemo = config.demoMaxPorIp,
   registrarLog = config.ambiente !== 'test',
 } = {}) {
   const app = express()
@@ -36,7 +37,7 @@ function criarApp({
   })
 
   app.use('/docs', docs)
-  app.use(criarRotas({ maxTentativasLogin }))
+  app.use(criarRotas({ maxTentativasLogin, maxContasDemo }))
 
   app.use(rotaNaoEncontrada)
   app.use(tratarErros)

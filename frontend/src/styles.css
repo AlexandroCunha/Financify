@@ -187,8 +187,8 @@ label input, label select { font-weight: 400; font-size: 1rem; }
 .lista h2.dia { margin: 0; padding: 20px 0 8px; font: 500 0.8rem/1.4 'DM Sans', system-ui, sans-serif; color: var(--suave); }
 .lista ul { list-style: none; margin: 0; padding: 0; }
 .lista li { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--trilho); }
-.info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.lista .info, .mini-lista .info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.lista .info strong, .mini-lista .info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .valor { min-width: 110px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .botoes { display: flex; }
 .paginacao { display: flex; justify-content: center; align-items: center; gap: 16px; color: var(--suave); }
@@ -269,3 +269,14 @@ label input, label select { font-weight: 400; font-size: 1rem; }
 @media (prefers-reduced-motion: reduce) {
   .barra { transition: none; }
 }
+
+/* Demonstração: botão na tela de login e aviso dentro do app */
+button.secundario { border-color: var(--marca); color: var(--texto); font-weight: 600; }
+button.secundario:hover:not(:disabled) { border-color: var(--marca); background: color-mix(in srgb, var(--marca) 14%, transparent); }
+.auth .demo { display: flex; flex-direction: column; gap: 6px; padding-top: 16px; border-top: 1px solid var(--borda); }
+.auth .demo small { color: var(--suave); text-align: center; }
+.faixa-demo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin-bottom: 24px; }
+.faixa-demo { flex-wrap: nowrap; text-align: left; }
+.faixa-demo span { flex: 1 1 auto; min-width: 0; }
+.faixa-demo .link { flex: none; min-height: 0; padding: 0; font-weight: 600; }
+@media (max-width: 860px) { .faixa-demo { flex-wrap: wrap; } }

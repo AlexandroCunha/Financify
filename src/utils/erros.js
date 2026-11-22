@@ -11,6 +11,7 @@ class ErroHttp extends Error {
 
 const requisicaoInvalida = (detalhes, mensagem = 'Dados inválidos.') => new ErroHttp(400, mensagem, detalhes)
 const naoAutorizado = (mensagem = 'Não autorizado.') => new ErroHttp(401, mensagem)
+const proibido = (mensagem = 'Ação não permitida.') => new ErroHttp(403, mensagem)
 const naoEncontrado = (mensagem = 'Recurso não encontrado.') => new ErroHttp(404, mensagem)
 const conflito = (mensagem) => new ErroHttp(409, mensagem)
 const muitasRequisicoes = (mensagem) => new ErroHttp(429, mensagem)
@@ -19,6 +20,7 @@ module.exports = {
   ErroHttp,
   requisicaoInvalida,
   naoAutorizado,
+  proibido,
   naoEncontrado,
   conflito,
   muitasRequisicoes,
