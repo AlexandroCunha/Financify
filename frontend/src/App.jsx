@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api, definirAoExpirar, token } from './api.js'
 import Autenticacao from './components/Autenticacao.jsx'
 import Painel from './components/Painel.jsx'
@@ -13,25 +13,47 @@ const ABAS = [
 
 export default function App() {
   const [usuario, setUsuario] = useState(null)
-  const [carregando, setCarregando] = useState(Boolean(token.ler()))
+  // ?demo no endereço (ex.: o link do portfólio) entra direto numa conta de demonstração.
+  const [pediuDemo] = useState(() => new URLSearchParams(window.location.search).has('demo'))
+  const [carregando, setCarregando] = useState(Boolean(token.ler()) || pediuDemo)
+  const [modoInicial, setModoInicial] = useState('login')
+  const demoPedida = useRef(false) // o StrictMode roda o efeito duas vezes em desenvolvimento
   const [aba, setAba] = useState('painel')
   const [aviso, setAviso] = useState('')
 
-  const sair = useCallback((mensagem = '') => {
+  const sair = useCallback((mensagem = '', modo = 'login') => {
     token.limpar()
     setUsuario(null)
     setAviso(mensagem)
+    setModoInicial(modo)
   }, [])
 
   useEffect(() => {
     definirAoExpirar(() => sair('Sua sessão expirou. Entre novamente.'))
-    if (!token.ler()) return
+    if (pediuDemo) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('demo')
+      window.history.replaceState(null, '', url)
+    }
+    if (!token.ler()) {
+      if (!pediuDemo || demoPedida.current) return
+      demoPedida.current = true
+      api
+        .demo()
+        .then(({ usuario: u, token: t }) => {
+          token.salvar(t)
+          setUsuario(u)
+        })
+        .catch((erro) => setAviso(erro.message))
+        .finally(() => setCarregando(false))
+      return
+    }
     api
       .perfil()
       .then(setUsuario)
       .catch(() => token.limpar())
       .finally(() => setCarregando(false))
-  }, [sair])
+  }, [sair, pediuDemo])
 
   const entrar = ({ usuario: u, token: t }) => {
     token.salvar(t)
@@ -41,7 +63,7 @@ export default function App() {
   }
 
   if (carregando) return <div className="tela-cheia">Carregando…</div>
-  if (!usuario) return <Autenticacao aoEntrar={entrar} aviso={aviso} />
+  if (!usuario) return <Autenticacao key={modoInicial} aoEntrar={entrar} aviso={aviso} modoInicial={modoInicial} />
 
   return (
     <div className="app">
@@ -64,6 +86,14 @@ export default function App() {
         </div>
       </header>
       <main className="conteudo">
+        {usuario.demo && (
+          <div className="alerta info faixa-demo">
+            <span>Conta de demonstração: os dados são de exemplo e esta conta é apagada em 24 horas.</span>
+            <button className="link" onClick={() => sair('', 'cadastro')}>
+              Criar minha conta
+            </button>
+          </div>
+        )}
         {aba === 'painel' && <Painel />}
         {aba === 'transacoes' && <Transacoes />}
         {aba === 'perfil' && <Perfil usuario={usuario} aoAtualizar={setUsuario} aoExcluir={() => sair('Conta excluída.')} />}

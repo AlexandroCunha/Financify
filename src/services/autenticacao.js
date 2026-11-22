@@ -8,10 +8,10 @@ const { naoAutorizado } = require('../utils/erros')
 // fica parecido nos dois casos e não revela quais e-mails têm conta.
 const HASH_FICTICIO = bcrypt.hashSync('financify-hash-ficticio', 10)
 
-function gerarToken(usuarioId) {
+function gerarToken(usuarioId, { expiraEm = config.jwt.expiraEm } = {}) {
   return jwt.sign({}, config.jwt.segredo, {
     subject: String(usuarioId),
-    expiresIn: config.jwt.expiraEm,
+    expiresIn: expiraEm,
     algorithm: 'HS256',
   })
 }

@@ -122,12 +122,13 @@ Set in `.env` (created by `npm run setup`):
 
 ## API
 
-All routes require `Authorization: Bearer <token>`, except sign-up, login, `/health` and `/docs`.
+All routes require `Authorization: Bearer <token>`, except sign-up, login, `/demo`, `/health` and `/docs`.
 
 | Method | Route | Description |
 | --- | --- | --- |
 | `POST` | `/usuarios` | Create a user |
 | `POST` | `/login` | Log in and receive the token |
+| `POST` | `/demo` | Create a demo account with sample data, already logged in (deleted after 24 hours) |
 | `GET` | `/usuarios/me` | Current user |
 | `PATCH` | `/usuarios/me` | Change name and/or e-mail |
 | `PUT` | `/usuarios/me/senha` | Change the password |

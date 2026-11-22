@@ -122,12 +122,13 @@ Definida no `.env` (criado por `npm run setup`):
 
 ## API
 
-Todas as rotas exigem `Authorization: Bearer <token>`, exceto cadastro, login, `/health` e `/docs`.
+Todas as rotas exigem `Authorization: Bearer <token>`, exceto cadastro, login, `/demo`, `/health` e `/docs`.
 
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | `POST` | `/usuarios` | Cadastrar usuário |
 | `POST` | `/login` | Fazer login e receber o token |
+| `POST` | `/demo` | Criar uma conta de demonstração com dados de exemplo, já logada (apagada em 24 horas) |
 | `GET` | `/usuarios/me` | Dados do usuário logado |
 | `PATCH` | `/usuarios/me` | Alterar nome e/ou e-mail |
 | `PUT` | `/usuarios/me/senha` | Trocar a senha |
