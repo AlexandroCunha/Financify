@@ -1,20 +1,20 @@
-// Cria o arquivo .env a partir do .env.example, já com um JWT_SECRET aleatório.
-// Uso: npm run setup
+// Creates the .env file from .env.example, with a random JWT_SECRET.
+// Usage: npm run setup
 const crypto = require('node:crypto')
 const fs = require('node:fs')
 const path = require('node:path')
 
-const raiz = path.resolve(__dirname, '..')
-const destino = path.join(raiz, '.env')
+const root = path.resolve(__dirname, '..')
+const target = path.join(root, '.env')
 
-if (fs.existsSync(destino)) {
-  console.log('O arquivo .env já existe. Nada foi alterado.')
+if (fs.existsSync(target)) {
+  console.log('The .env file already exists. Nothing was changed.')
   process.exit(0)
 }
 
-const modelo = fs.readFileSync(path.join(raiz, '.env.example'), 'utf8')
-const segredo = crypto.randomBytes(32).toString('hex')
-fs.writeFileSync(destino, modelo.replace(/^JWT_SECRET=.*$/m, `JWT_SECRET=${segredo}`))
+const template = fs.readFileSync(path.join(root, '.env.example'), 'utf8')
+const secret = crypto.randomBytes(32).toString('hex')
+fs.writeFileSync(target, template.replace(/^JWT_SECRET=.*$/m, `JWT_SECRET=${secret}`))
 
-console.log('Arquivo .env criado com um JWT_SECRET aleatório.')
-console.log('Se não for usar o Docker, ajuste o DATABASE_URL para o seu PostgreSQL.')
+console.log('Created .env with a random JWT_SECRET.')
+console.log('If you are not using Docker, point DATABASE_URL at your PostgreSQL.')

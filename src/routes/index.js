@@ -1,51 +1,51 @@
 const { Router } = require('express')
-const autenticar = require('../middlewares/autenticar')
-const limitarTentativas = require('../middlewares/limitarTentativas')
-const autenticacao = require('../controllers/autenticacao')
+const authenticate = require('../middlewares/authenticate')
+const rateLimit = require('../middlewares/rateLimit')
+const auth = require('../controllers/auth')
 const demo = require('../controllers/demo')
-const usuarios = require('../controllers/usuarios')
-const categorias = require('../controllers/categorias')
-const transacoes = require('../controllers/transacoes')
+const users = require('../controllers/users')
+const categories = require('../controllers/categories')
+const transactions = require('../controllers/transactions')
 
-function criarRotas({ maxTentativasLogin, maxContasDemo }) {
-  const rotas = Router()
+function createRoutes({ maxLoginAttempts, maxDemoAccounts }) {
+  const routes = Router()
 
-  // Públicas
-  const limiteDeLogin =
-    maxTentativasLogin > 0
-      ? [limitarTentativas({ maximo: maxTentativasLogin, mensagem: 'Muitas tentativas de login. Tente novamente em alguns minutos.' })]
+  // Public
+  const loginLimit =
+    maxLoginAttempts > 0
+      ? [rateLimit({ max: maxLoginAttempts, message: 'Too many login attempts. Try again in a few minutes.' })]
       : []
-  rotas.post('/login', ...limiteDeLogin, autenticacao.login)
-  rotas.post('/usuarios', usuarios.cadastrar)
+  routes.post('/login', ...loginLimit, auth.login)
+  routes.post('/users', users.signUp)
 
-  // Conta de demonstração com dados de exemplo (uma por visitante, apagada em 24 horas)
-  const limiteDeDemo =
-    maxContasDemo > 0
-      ? [limitarTentativas({ maximo: maxContasDemo, mensagem: 'Muitas contas de demonstração criadas. Tente novamente em alguns minutos.' })]
+  // Demo account with sample data (one per visitor, deleted after 24 hours)
+  const demoLimit =
+    maxDemoAccounts > 0
+      ? [rateLimit({ max: maxDemoAccounts, message: 'Too many demo accounts created. Try again in a few minutes.' })]
       : []
-  rotas.post('/demo', ...limiteDeDemo, demo.criar)
+  routes.post('/demo', ...demoLimit, demo.create)
 
-  // Conta do usuário logado
-  rotas.get('/usuarios/me', autenticar, usuarios.detalhar)
-  rotas.patch('/usuarios/me', autenticar, usuarios.atualizar)
-  rotas.put('/usuarios/me/senha', autenticar, usuarios.alterarSenha)
-  rotas.delete('/usuarios/me', autenticar, usuarios.excluir)
+  // The signed-in user's account
+  routes.get('/users/me', authenticate, users.show)
+  routes.patch('/users/me', authenticate, users.update)
+  routes.put('/users/me/password', authenticate, users.changePassword)
+  routes.delete('/users/me', authenticate, users.remove)
 
-  // Categorias e transações (todas exigem login)
-  rotas.get('/categorias', autenticar, categorias.listar)
+  // Categories and transactions (all need a signed-in user)
+  routes.get('/categories', authenticate, categories.list)
 
-  const rotasDeTransacoes = Router()
-  rotasDeTransacoes.use(autenticar)
-  rotasDeTransacoes.get('/', transacoes.listar)
-  rotasDeTransacoes.get('/extrato', transacoes.extrato)
-  rotasDeTransacoes.get('/resumo-mensal', transacoes.resumoMensal)
-  rotasDeTransacoes.get('/:id', transacoes.detalhar)
-  rotasDeTransacoes.post('/', transacoes.cadastrar)
-  rotasDeTransacoes.put('/:id', transacoes.atualizar)
-  rotasDeTransacoes.delete('/:id', transacoes.excluir)
-  rotas.use('/transacoes', rotasDeTransacoes)
+  const transactionRoutes = Router()
+  transactionRoutes.use(authenticate)
+  transactionRoutes.get('/', transactions.list)
+  transactionRoutes.get('/statement', transactions.statement)
+  transactionRoutes.get('/monthly-summary', transactions.monthlySummary)
+  transactionRoutes.get('/:id', transactions.show)
+  transactionRoutes.post('/', transactions.create)
+  transactionRoutes.put('/:id', transactions.update)
+  transactionRoutes.delete('/:id', transactions.remove)
+  routes.use('/transactions', transactionRoutes)
 
-  return rotas
+  return routes
 }
 
-module.exports = criarRotas
+module.exports = createRoutes

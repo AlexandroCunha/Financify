@@ -1,13 +1,13 @@
 const { Router } = require('express')
-const especificacao = require('./openapi')
+const spec = require('./openapi')
 
-// Página do Swagger UI (carregado de um CDN) apontando para a especificação desta API.
-const PAGINA = `<!doctype html>
-<html lang="pt-BR">
+// Swagger UI page (loaded from a CDN) pointing at this API's spec.
+const PAGE = `<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Financify API · Documentação</title>
+    <title>Financify API · Docs</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
   </head>
   <body>
@@ -19,8 +19,8 @@ const PAGINA = `<!doctype html>
   </body>
 </html>`
 
-const rotas = Router()
-rotas.get('/', (req, res) => res.type('html').send(PAGINA))
-rotas.get('/openapi.json', (req, res) => res.json(especificacao))
+const routes = Router()
+routes.get('/', (req, res) => res.type('html').send(PAGE))
+routes.get('/openapi.json', (req, res) => res.json(spec))
 
-module.exports = rotas
+module.exports = routes

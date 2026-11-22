@@ -1,14 +1,14 @@
 {
   "name": "financify",
   "version": "2.0.0",
-  "description": "API REST para gerenciamento de finanças pessoais",
+  "description": "REST API for personal finance management",
   "private": true,
   "main": "src/server.js",
   "scripts": {
     "setup": "node scripts/setup.js",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "db:migrate": "node src/db/migrar.js",
+    "db:migrate": "node src/db/migrate.js",
     "test": "node --test --test-concurrency=1 \"test/**/*.test.js\""
   },
   "engines": {
@@ -19,7 +19,7 @@
     "rest",
     "express",
     "postgresql",
-    "financas-pessoais"
+    "personal-finance"
   ],
   "author": "Alexandro Cunha",
   "license": "ISC",

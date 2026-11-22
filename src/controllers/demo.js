@@ -1,7 +1,7 @@
-const servico = require('../services/demo')
+const service = require('../services/demo')
 
-async function criar(req, res) {
-  res.status(201).json(await servico.criarContaDemo())
+async function create(req, res) {
+  res.status(201).json(await service.createDemoAccount())
 }
 
-module.exports = { criar }
+module.exports = { create }
