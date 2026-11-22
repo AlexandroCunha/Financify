@@ -29,14 +29,27 @@
 
 ## Screenshots
 
+Taken on the [live app](https://financify-web-m2zy.onrender.com/?demo), in a demo account:
+
 <p align="center">
-  <img src="docs/screenshots/painel.png" alt="Dashboard for November: month balance compared with October, month-by-month bar chart, spending by category donut, monthly net line chart and latest transactions" width="760">
+  <img src="docs/screenshots/app-painel.png" alt="Live app: dashboard for November in a demo account, with balance compared with October, month-by-month bars and spending by category" width="760">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/app-transacoes.png" alt="Live app: transactions grouped by day, with filters and the income/expense bar for the period" width="376">
+  <img src="docs/screenshots/app-nova-transacao.png" alt="Live app: new transaction form" width="376">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/app-celular.png" alt="Live app on a phone-sized screen" width="260">
 </p>
 
 <details>
-<summary>More screenshots</summary>
+<summary>More screenshots, made from the code with sample data</summary>
 
 <p align="center">
+  <img src="docs/screenshots/painel.png" alt="Dashboard for November: month balance compared with October, month-by-month bar chart, spending by category donut, monthly net line chart and latest transactions" width="760">
+  <br><br>
   <img src="docs/screenshots/transacoes.png" alt="Transactions grouped by day, with filters and a colour per category" width="760">
   <br><br>
   <img src="docs/screenshots/nova-transacao.png" alt="New transaction form with an expense/income switch and categories as chips" width="760">
