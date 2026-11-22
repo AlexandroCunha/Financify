@@ -1,61 +1,77 @@
-const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'EUR' })
-const moedaInteira = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
-const percentual = new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })
+const LOCALE = 'en-IE'
+const currency = new Intl.NumberFormat(LOCALE, { style: 'currency', currency: 'EUR' })
+const wholeCurrency = new Intl.NumberFormat(LOCALE, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+const percent = new Intl.NumberFormat(LOCALE, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })
 
-export const formatarMoeda = (centavos) => moeda.format(centavos / 100)
-export const formatarMoedaInteira = (centavos) => moedaInteira.format(centavos / 100)
-export const formatarPercentual = (fracao) => percentual.format(fracao)
+export const formatCurrency = (cents) => currency.format(cents / 100)
+export const formatWholeCurrency = (cents) => wholeCurrency.format(cents / 100)
+export const formatPercent = (fraction) => percent.format(fraction)
 
-// "+ € 10,00" / "− € 10,00": o mesmo formato do painel à lista de transações.
-export const formatarComSinal = (centavos) => `${centavos < 0 ? '−' : '+'} ${formatarMoeda(Math.abs(centavos))}`
+// "+€10.00" / "−€10.00": the same format on the dashboard and in the transaction list.
+export const formatSigned = (cents) => `${cents < 0 ? '−' : '+'}${formatCurrency(Math.abs(cents))}`
 
-// "2026-10-19" -> "19/10/2026" (sem passar por Date, para não sofrer com fuso horário)
-export const formatarData = (iso) => iso.slice(0, 10).split('-').reverse().join('/')
+// "2026-10-19" -> "19 Oct 2026" (read as UTC, so the day does not shift with the time zone)
+export const formatDate = (iso) =>
+  new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString(LOCALE, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
 
-export const hoje = () => {
+export const today = () => {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-// "10,50" / "1.050,25" (euros) -> 1050 / 105025 centavos; NaN se inválido
-export function valorParaCentavos(texto) {
-  const limpo = String(texto).trim().replace(/\./g, '').replace(',', '.')
-  if (!/^\d+(\.\d{1,2})?$/.test(limpo)) return NaN
-  return Math.round(parseFloat(limpo) * 100)
+// "10.50" / "1,050.25" (euros) -> 1050 / 105025 cents; NaN if invalid
+export function amountToCents(text) {
+  const clean = String(text).trim().replace(/,/g, '')
+  if (!/^\d+(\.\d{1,2})?$/.test(clean)) return NaN
+  return Math.round(parseFloat(clean) * 100)
 }
 
-export const centavosParaTexto = (centavos) => (centavos / 100).toFixed(2).replace('.', ',')
+export const centsToText = (cents) => (cents / 100).toFixed(2)
 
-export const NOMES_MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-const MESES_LONGOS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
+export const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const LONG_MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
 
-const capitalizar = (texto) => texto.charAt(0).toUpperCase() + texto.slice(1)
+// Months are "YYYY-MM".
+export const currentMonth = () => today().slice(0, 7)
 
-// Meses são "AAAA-MM".
-export const mesAtual = () => hoje().slice(0, 7)
-
-export function deslocarMes(mes, delta) {
-  const [ano, numero] = mes.split('-').map(Number)
-  const indice = ano * 12 + (numero - 1) + delta
-  return `${Math.floor(indice / 12)}-${String((indice % 12) + 1).padStart(2, '0')}`
+export function shiftMonth(month, delta) {
+  const [year, number] = month.split('-').map(Number)
+  const index = year * 12 + (number - 1) + delta
+  return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, '0')}`
 }
 
-export function limitesDoMes(mes) {
-  const [ano, numero] = mes.split('-').map(Number)
-  const ultimo = new Date(ano, numero, 0).getDate()
-  return { de: `${mes}-01`, ate: `${mes}-${String(ultimo).padStart(2, '0')}` }
+export function monthRange(month) {
+  const [year, number] = month.split('-').map(Number)
+  const last = new Date(year, number, 0).getDate()
+  return { from: `${month}-01`, to: `${month}-${String(last).padStart(2, '0')}` }
 }
 
-export const nomeDoMes = (mes) => MESES_LONGOS[Number(mes.slice(5, 7)) - 1]
-export const rotuloDoMes = (mes) => `${capitalizar(nomeDoMes(mes))} de ${mes.slice(0, 4)}`
+export const monthName = (month) => LONG_MONTHS[Number(month.slice(5, 7)) - 1]
+export const monthLabel = (month) => `${monthName(month)} ${month.slice(0, 4)}`
 
-// "2026-11-22" -> "Domingo, 22 de novembro" (UTC, para o dia não mudar com o fuso)
-export const rotuloDoDia = (iso) =>
-  capitalizar(
-    new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      timeZone: 'UTC',
-    }),
-  )
+// "2026-11-22" -> "Sunday 22 November" (UTC, so the day does not shift with the time zone)
+export const dayLabel = (iso) =>
+  new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString(LOCALE, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  })

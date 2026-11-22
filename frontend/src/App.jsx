@@ -1,126 +1,128 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api, definirAoExpirar, token } from './api.js'
-import Autenticacao from './components/Autenticacao.jsx'
-import Painel from './components/Painel.jsx'
-import Transacoes from './components/Transacoes.jsx'
-import Perfil from './components/Perfil.jsx'
+import { api, setOnExpired, token } from './api.js'
+import Auth from './components/Auth.jsx'
+import Dashboard from './components/Dashboard.jsx'
+import Transactions from './components/Transactions.jsx'
+import Account from './components/Account.jsx'
 
-const ABAS = [
-  { id: 'painel', rotulo: 'Painel' },
-  { id: 'transacoes', rotulo: 'Transações' },
-  { id: 'perfil', rotulo: 'Conta' },
+const TABS = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'transactions', label: 'Transactions' },
+  { id: 'account', label: 'Account' },
 ]
 
-// A API gratuita dorme quando fica parada; a primeira resposta pode levar cerca de um minuto.
-function TelaCarregando() {
-  const [demora, setDemora] = useState(false)
+// The free API sleeps when idle; the first response can take about a minute.
+function LoadingScreen() {
+  const [slow, setSlow] = useState(false)
   useEffect(() => {
-    const espera = setTimeout(() => setDemora(true), 4000)
-    return () => clearTimeout(espera)
+    const wait = setTimeout(() => setSlow(true), 4000)
+    return () => clearTimeout(wait)
   }, [])
   return (
-    <div className="tela-cheia">
-      <div className="carregando" role="status">
-        <p>Carregando…</p>
-        {demora && <small>Acordando o servidor. Na primeira visita depois de um tempo parado, isso pode levar cerca de 1 minuto.</small>}
+    <div className="full-screen">
+      <div className="loading" role="status">
+        <p>Loading…</p>
+        {slow && <small>Waking up the server. After a while without visits, this can take about 1 minute.</small>}
       </div>
     </div>
   )
 }
 
 export default function App() {
-  const [usuario, setUsuario] = useState(null)
-  // ?demo no endereço (ex.: o link do portfólio) entra direto numa conta de demonstração.
-  const [pediuDemo] = useState(() => new URLSearchParams(window.location.search).has('demo'))
-  const [carregando, setCarregando] = useState(Boolean(token.ler()) || pediuDemo)
-  const [modoInicial, setModoInicial] = useState('login')
-  const demoPedida = useRef(false) // o StrictMode roda o efeito duas vezes em desenvolvimento
-  const [aba, setAba] = useState('painel')
-  const [abrirNova, setAbrirNova] = useState(false)
-  const [aviso, setAviso] = useState('')
+  const [user, setUser] = useState(null)
+  // ?demo in the address (e.g. the portfolio link) goes straight into a demo account.
+  const [demoRequested] = useState(() => new URLSearchParams(window.location.search).has('demo'))
+  const [loading, setLoading] = useState(Boolean(token.read()) || demoRequested)
+  const [initialMode, setInitialMode] = useState('login')
+  const demoStarted = useRef(false) // StrictMode runs effects twice in development
+  const [tab, setTab] = useState('dashboard')
+  const [openNew, setOpenNew] = useState(false)
+  const [notice, setNotice] = useState('')
 
-  const sair = useCallback((mensagem = '', modo = 'login') => {
-    token.limpar()
-    setUsuario(null)
-    setAviso(mensagem)
-    setModoInicial(modo)
+  const signOut = useCallback((message = '', mode = 'login') => {
+    token.clear()
+    setUser(null)
+    setNotice(message)
+    setInitialMode(mode)
   }, [])
 
   useEffect(() => {
-    definirAoExpirar(() => sair('Sua sessão expirou. Entre novamente.'))
-    if (pediuDemo) {
+    setOnExpired(() => signOut('Your session has expired. Please sign in again.'))
+    if (demoRequested) {
       const url = new URL(window.location.href)
       url.searchParams.delete('demo')
       window.history.replaceState(null, '', url)
     }
-    if (!token.ler()) {
-      if (!pediuDemo || demoPedida.current) return
-      demoPedida.current = true
+    if (!token.read()) {
+      if (!demoRequested || demoStarted.current) return
+      demoStarted.current = true
       api
         .demo()
-        .then(({ usuario: u, token: t }) => {
-          token.salvar(t)
-          setUsuario(u)
+        .then(({ user: u, token: t }) => {
+          token.save(t)
+          setUser(u)
         })
-        .catch((erro) => setAviso(erro.message))
-        .finally(() => setCarregando(false))
+        .catch((error) => setNotice(error.message))
+        .finally(() => setLoading(false))
       return
     }
     api
-      .perfil()
-      .then(setUsuario)
-      .catch(() => token.limpar())
-      .finally(() => setCarregando(false))
-  }, [sair, pediuDemo])
+      .profile()
+      .then(setUser)
+      .catch(() => token.clear())
+      .finally(() => setLoading(false))
+  }, [signOut, demoRequested])
 
-  const irPara = (id, { nova = false } = {}) => {
-    setAba(id)
-    setAbrirNova(nova)
+  const goTo = (id, { newTransaction = false } = {}) => {
+    setTab(id)
+    setOpenNew(newTransaction)
   }
 
-  const entrar = ({ usuario: u, token: t }) => {
-    token.salvar(t)
-    setUsuario(u)
-    setAviso('')
-    irPara('painel')
+  const signIn = ({ user: u, token: t }) => {
+    token.save(t)
+    setUser(u)
+    setNotice('')
+    goTo('dashboard')
   }
 
-  if (carregando) return <TelaCarregando />
-  if (!usuario) return <Autenticacao key={modoInicial} aoEntrar={entrar} aviso={aviso} modoInicial={modoInicial} />
+  if (loading) return <LoadingScreen />
+  if (!user) return <Auth key={initialMode} onSignIn={signIn} notice={notice} initialMode={initialMode} />
 
   return (
     <div className="app">
-      <nav className="lateral" aria-label="Principal">
-        <div className="marca">Financify</div>
-        <div className="abas">
-          {ABAS.map((a) => (
-            <button key={a.id} className={aba === a.id ? 'ativa' : ''} aria-current={aba === a.id ? 'page' : undefined} onClick={() => irPara(a.id)}>
-              {a.rotulo}
+      <nav className="sidebar" aria-label="Main">
+        <div className="brand">Financify</div>
+        <div className="tabs">
+          {TABS.map((t) => (
+            <button key={t.id} className={tab === t.id ? 'active' : ''} aria-current={tab === t.id ? 'page' : undefined} onClick={() => goTo(t.id)}>
+              {t.label}
             </button>
           ))}
         </div>
-        <div className="usuario">
-          <span className="avatar" aria-hidden="true">{usuario.nome.charAt(0).toUpperCase()}</span>
-          <span className="nome">{usuario.nome}</span>
-          <button className="link" onClick={() => sair()}>
-            Sair
-          </button>
+        <div className="user">
+          <span className="avatar" aria-hidden="true">{user.name.charAt(0).toUpperCase()}</span>
+          <div className="user-text">
+            <span className="name">{user.name}</span>
+            <button className="link" onClick={() => signOut()}>
+              Sign out
+            </button>
+          </div>
         </div>
       </nav>
-      <main className="conteudo">
-        {usuario.demo && (
-          <div className="alerta info faixa-demo">
-            <span>Conta de demonstração: os dados são de exemplo e esta conta é apagada em 24 horas.</span>
-            <button className="link" onClick={() => sair('', 'cadastro')}>
-              Criar minha conta
+      <main className="content">
+        {user.demo && (
+          <div className="alert info demo-banner">
+            <span>Demo account: the data is sample data and this account is deleted after 24 hours.</span>
+            <button className="link" onClick={() => signOut('', 'signup')}>
+              Create my account
             </button>
           </div>
         )}
-        {aba === 'painel' && (
-          <Painel aoNovaTransacao={() => irPara('transacoes', { nova: true })} aoVerTransacoes={() => irPara('transacoes')} />
+        {tab === 'dashboard' && (
+          <Dashboard onNewTransaction={() => goTo('transactions', { newTransaction: true })} onSeeTransactions={() => goTo('transactions')} />
         )}
-        {aba === 'transacoes' && <Transacoes abrirNova={abrirNova} />}
-        {aba === 'perfil' && <Perfil usuario={usuario} aoAtualizar={setUsuario} aoExcluir={() => sair('Conta excluída.')} />}
+        {tab === 'transactions' && <Transactions openNew={openNew} />}
+        {tab === 'account' && <Account user={user} onUpdate={setUser} onDelete={() => signOut('Account deleted.')} />}
       </main>
     </div>
   )

@@ -8,10 +8,6 @@
 </p>
 
 <p align="center">
-  <strong>English</strong> · <a href="README.pt-BR.md">Português</a>
-</p>
-
-<p align="center">
   <a href="https://financify-web-m2zy.onrender.com/?demo"><strong>Try the live demo</strong></a> (no sign-up: opens an account with sample data) · <a href="https://financify-web-m2zy.onrender.com">Open the app</a>
 </p>
 
@@ -29,43 +25,14 @@
 
 ## Screenshots
 
-Taken on the [live app](https://financify-web-m2zy.onrender.com/?demo), in a demo account:
-
 <p align="center">
-  <img src="docs/screenshots/app-painel.png" alt="Live app: dashboard for November in a demo account, with balance compared with October, month-by-month bars and spending by category" width="760">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard for November 2026: balance, income and expenses compared with October, a month-by-month bar chart, spending by category, what was left each month and the latest transactions" width="760">
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/app-transacoes.png" alt="Live app: transactions grouped by day, with filters and the income/expense bar for the period" width="376">
-  <img src="docs/screenshots/app-nova-transacao.png" alt="Live app: new transaction form" width="376">
+  <img src="docs/screenshots/transactions.png" alt="Transactions grouped by day, with filters, the income/expense bar for the period and a colour per category" width="376">
+  <img src="docs/screenshots/new-transaction.png" alt="New transaction form with an expense/income switch and categories as chips" width="376">
 </p>
-
-<p align="center">
-  <img src="docs/screenshots/app-celular.png" alt="Live app on a phone-sized screen" width="260">
-</p>
-
-<details>
-<summary>More screenshots, made from the code with sample data</summary>
-
-<p align="center">
-  <img src="docs/screenshots/painel.png" alt="Dashboard for November: month balance compared with October, month-by-month bar chart, spending by category donut, monthly net line chart and latest transactions" width="760">
-  <br><br>
-  <img src="docs/screenshots/transacoes.png" alt="Transactions grouped by day, with filters and a colour per category" width="760">
-  <br><br>
-  <img src="docs/screenshots/nova-transacao.png" alt="New transaction form with an expense/income switch and categories as chips" width="760">
-  <br><br>
-  <img src="docs/screenshots/excluir.png" alt="Confirmation before deleting a transaction, showing its name and amount" width="760">
-  <br><br>
-  <img src="docs/screenshots/entrar.png" alt="Sign-in screen with the Try the demo button" width="760">
-  <br><br>
-  <img src="docs/screenshots/demonstracao.png" alt="Dashboard in a demo account, with the banner to create a real account" width="760">
-  <br><br>
-  <img src="docs/screenshots/painel-escuro.png" alt="Dashboard in dark mode" width="760">
-  <br><br>
-  <img src="docs/screenshots/celular.png" alt="Dashboard on a phone" width="300">
-</p>
-
-</details>
 
 ## Features
 
@@ -144,8 +111,8 @@ Set in `.env` (created by `npm run setup`):
 | `JWT_EXPIRES_IN` | no | `1d` | Token lifetime (`1h`, `7d`...) |
 | `PORT` | no | `3000` | API port |
 | `CORS_ORIGIN` | no | | Allowed front-end origins, comma-separated |
-| `LOGIN_MAX_TENTATIVAS` | no | `10` | Login attempts per IP every 15 minutes (`0` disables the limit) |
-| `DEMO_MAX_POR_IP` | no | `5` | Demo accounts per IP every 15 minutes (`0` disables the limit) |
+| `LOGIN_MAX_ATTEMPTS` | no | `10` | Sign-in attempts per IP every 15 minutes (`0` disables the limit) |
+| `DEMO_MAX_PER_IP` | no | `5` | Demo accounts per IP every 15 minutes (`0` disables the limit) |
 | `TRUST_PROXY` | no | | Use `1` in production behind a proxy (Render, Railway...), so the limits see the visitor's real IP |
 | `DATABASE_URL_TEST` | no | `DATABASE_URL` + `_test` | Database used by the tests |
 
@@ -155,50 +122,50 @@ All routes require `Authorization: Bearer <token>`, except sign-up, login, `/dem
 
 | Method | Route | Description |
 | --- | --- | --- |
-| `POST` | `/usuarios` | Create a user |
-| `POST` | `/login` | Log in and receive the token |
-| `POST` | `/demo` | Create a demo account with sample data, already logged in (deleted after 24 hours) |
-| `GET` | `/usuarios/me` | Current user |
-| `PATCH` | `/usuarios/me` | Change name and/or e-mail |
-| `PUT` | `/usuarios/me/senha` | Change the password |
-| `DELETE` | `/usuarios/me` | Delete the account and its transactions |
-| `GET` | `/categorias` | List categories |
-| `GET` | `/transacoes` | List transactions (filters: `tipo`, `categoria_id`, `de`, `ate`, `pagina`, `limite`, `ordem`) |
-| `POST` | `/transacoes` | Create a transaction |
-| `GET` | `/transacoes/:id` | Get a transaction |
-| `PUT` | `/transacoes/:id` | Update a transaction |
-| `DELETE` | `/transacoes/:id` | Delete a transaction |
-| `GET` | `/transacoes/extrato` | Income, expenses, balance and totals per category (filters: `de`, `ate`) |
-| `GET` | `/transacoes/resumo-mensal` | Month-by-month totals for a year (filter: `ano`) |
+| `POST` | `/users` | Sign up |
+| `POST` | `/login` | Sign in and receive the token |
+| `POST` | `/demo` | Create a demo account with sample data, already signed in (deleted after 24 hours) |
+| `GET` | `/users/me` | Current user |
+| `PATCH` | `/users/me` | Change name and/or e-mail |
+| `PUT` | `/users/me/password` | Change the password |
+| `DELETE` | `/users/me` | Delete the account and its transactions |
+| `GET` | `/categories` | List categories |
+| `GET` | `/transactions` | List transactions (filters: `type`, `category_id`, `from`, `to`, `page`, `limit`, `order`) |
+| `POST` | `/transactions` | Create a transaction |
+| `GET` | `/transactions/:id` | Get a transaction |
+| `PUT` | `/transactions/:id` | Update a transaction |
+| `DELETE` | `/transactions/:id` | Delete a transaction |
+| `GET` | `/transactions/statement` | Income, expenses, balance and totals per category (filters: `from`, `to`) |
+| `GET` | `/transactions/monthly-summary` | Month-by-month totals for a year (filter: `year`) |
 | `GET` | `/health` | Checks that the API and the database are up |
 
-> **Conventions:** route names and JSON fields are in Portuguese (`transacoes`, `valor`, `data`...). Amounts are **euro cents** and dates use `YYYY-MM-DD`: `"valor": 1050` is € 10.50.
+> **Conventions:** amounts are **euro cents** and dates use `YYYY-MM-DD`: `"amount": 1050` is €10.50. A transaction's `type` is `income` or `expense`.
 
 ### Example
 
 ```bash
 # sign up
-curl -X POST http://localhost:3000/usuarios -H "Content-Type: application/json" \
-  -d '{"nome":"Ana Souza","email":"ana@email.com","senha":"strong-password-123"}'
+curl -X POST http://localhost:3000/users -H "Content-Type: application/json" \
+  -d '{"name":"Ana Souza","email":"ana@email.com","password":"strong-password-123"}'
 
-# log in (keep the token in a variable)
+# sign in (keep the token in a variable)
 TOKEN=$(curl -s -X POST http://localhost:3000/login -H "Content-Type: application/json" \
-  -d '{"email":"ana@email.com","senha":"strong-password-123"}' | node -pe "JSON.parse(require('fs').readFileSync(0)).token")
+  -d '{"email":"ana@email.com","password":"strong-password-123"}' | node -pe "JSON.parse(require('fs').readFileSync(0)).token")
 
-# new transaction (category 14 = Salário / salary)
-curl -X POST http://localhost:3000/transacoes -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
-  -d '{"descricao":"Salary","valor":500000,"data":"2026-10-05","categoria_id":14,"tipo":"entrada"}'
+# new transaction (category 14 = Salary)
+curl -X POST http://localhost:3000/transactions -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" \
+  -d '{"description":"Salary","amount":500000,"date":"2026-10-05","category_id":14,"type":"income"}'
 
 # statement for October
-curl "http://localhost:3000/transacoes/extrato?de=2026-10-01&ate=2026-10-31" -H "Authorization: Bearer $TOKEN"
+curl "http://localhost:3000/transactions/statement?from=2026-10-01&to=2026-10-31" -H "Authorization: Bearer $TOKEN"
 ```
 
-Errors always have the same shape (messages are in Portuguese):
+Errors always have the same shape:
 
 ```json
 {
-  "mensagem": "Dados inválidos.",
-  "erros": { "valor": "deve ser um número inteiro maior que zero, em centavos (ex.: 1050 = € 10,50)" }
+  "message": "Invalid data.",
+  "errors": { "amount": "must be a whole number greater than zero, in cents (e.g. 1050 = €10.50)" }
 }
 ```
 
@@ -226,7 +193,7 @@ src/
 ├── services/          # business rules
 ├── repositories/      # SQL queries
 ├── validations/       # input validation rules
-├── middlewares/       # authentication, security, login rate limit, logging and errors
+├── middlewares/       # authentication, security, rate limits, logging and errors
 ├── docs/              # OpenAPI spec and Swagger page
 └── utils/
 frontend/              # web app (React + Vite)
@@ -268,6 +235,7 @@ Version 1 started in 2023 as a Cubos Academy module 3 challenge. Version 2 moder
 - **Bugs fixed:** the statement returned numbers as text; dates shifted by one day depending on the time zone; getting one transaction returned a list; the filter without `[]` crashed the route.
 - **Safer login:** does not reveal whether an e-mail exists, rate-limited, tokens expire after one day.
 - **Organization:** layered architecture, standardized JSON errors, Swagger docs, automated tests, euro currency and the React web app.
+- **All in English:** the screens, the API routes and fields, the error messages, the database and the code (the database is renamed in place by `005_english_schema.sql`, so existing data is kept).
 
 </details>
 

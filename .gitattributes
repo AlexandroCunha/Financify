@@ -1,4 +1,4 @@
-# Fim de linha LF em todos os arquivos de texto, em qualquer sistema operacional.
+# LF line endings in every text file, on any operating system.
 * text=auto eol=lf
 
 *.png binary

@@ -1,94 +1,90 @@
 const { describe, it, before, after, beforeEach } = require('node:test')
 const assert = require('node:assert/strict')
 const h = require('./helpers')
-const { transacoesDeExemplo } = require('../src/services/demo')
+const { sampleTransactions } = require('../src/services/demo')
 
-before(() => h.iniciar())
-after(() => h.encerrar())
-beforeEach(() => h.limparBanco())
+before(() => h.start())
+after(() => h.stop())
+beforeEach(() => h.resetDatabase())
 
 describe('POST /demo', () => {
-  it('cria uma conta de demonstração já logada, com transações de exemplo', async () => {
-    const { status, corpo } = await h.api('POST', '/demo')
+  it('creates a demo account, already signed in, with sample transactions', async () => {
+    const { status, body } = await h.api('POST', '/demo')
     assert.equal(status, 201)
-    assert.equal(corpo.usuario.demo, true)
-    assert.equal('senha' in corpo.usuario, false)
-    assert.match(corpo.usuario.email, /^demo-[0-9a-f]{16}@financify\.invalid$/)
-    assert.equal(corpo.expira_em_horas, 24)
+    assert.equal(body.user.demo, true)
+    assert.equal('password' in body.user, false)
+    assert.match(body.user.email, /^demo-[0-9a-f]{16}@financify\.invalid$/)
+    assert.equal(body.expires_in_hours, 24)
 
-    const lista = await h.api('GET', '/transacoes?limite=100', { token: corpo.token })
-    assert.equal(lista.status, 200)
-    // todas as transações de exemplo entraram (nenhuma categoria ficou de fora)
-    assert.equal(lista.corpo.paginacao.total, transacoesDeExemplo().length)
+    const list = await h.api('GET', '/transactions?limit=100', { token: body.token })
+    assert.equal(list.status, 200)
+    // every sample transaction went in (no category was left out)
+    assert.equal(list.body.pagination.total, sampleTransactions().length)
 
-    const extrato = await h.api('GET', '/transacoes/extrato', { token: corpo.token })
-    assert.ok(extrato.corpo.entrada > 0)
-    assert.ok(extrato.corpo.saida > 0)
+    const statement = await h.api('GET', '/transactions/statement', { token: body.token })
+    assert.ok(statement.body.income > 0)
+    assert.ok(statement.body.expenses > 0)
   })
 
-  it('cada visitante ganha uma conta separada', async () => {
+  it('each visitor gets a separate account', async () => {
     const a = await h.api('POST', '/demo')
     const b = await h.api('POST', '/demo')
-    assert.notEqual(a.corpo.usuario.id, b.corpo.usuario.id)
+    assert.notEqual(a.body.user.id, b.body.user.id)
 
-    await h.api('POST', '/transacoes', { token: a.corpo.token, corpo: h.novaTransacao({ descricao: 'Só da conta A' }) })
-    const listaB = await h.api('GET', '/transacoes?limite=100', { token: b.corpo.token })
-    assert.equal(listaB.corpo.transacoes.some((t) => t.descricao === 'Só da conta A'), false)
+    await h.api('POST', '/transactions', { token: a.body.token, body: h.newTransaction({ description: 'Only in account A' }) })
+    const listB = await h.api('GET', '/transactions?limit=100', { token: b.body.token })
+    assert.equal(listB.body.transactions.some((t) => t.description === 'Only in account A'), false)
   })
 
-  it('apaga as contas de demonstração com mais de 24 horas, e só elas', async () => {
-    const real = await h.criarUsuarioLogado()
-    const antiga = await h.api('POST', '/demo')
-    await h.pool.query(`UPDATE usuarios SET criado_em = now() - interval '25 hours' WHERE id = $1`, [antiga.corpo.usuario.id])
-    await h.pool.query(`UPDATE usuarios SET criado_em = now() - interval '25 hours' WHERE id = $1`, [real.id])
+  it('deletes demo accounts older than 24 hours, and only those', async () => {
+    const real = await h.createSignedInUser()
+    const old = await h.api('POST', '/demo')
+    await h.pool.query(`UPDATE users SET created_at = now() - interval '25 hours' WHERE id = $1`, [old.body.user.id])
+    await h.pool.query(`UPDATE users SET created_at = now() - interval '25 hours' WHERE id = $1`, [real.id])
 
     await h.api('POST', '/demo')
 
-    const { rows } = await h.pool.query('SELECT id FROM usuarios WHERE id = ANY($1::int[])', [
-      [antiga.corpo.usuario.id, real.id],
-    ])
+    const { rows } = await h.pool.query('SELECT id FROM users WHERE id = ANY($1::int[])', [[old.body.user.id, real.id]])
     assert.deepEqual(rows.map((r) => r.id), [real.id])
-    const sobras = await h.pool.query('SELECT count(*)::int AS n FROM transacoes WHERE usuario_id = $1', [
-      antiga.corpo.usuario.id,
-    ])
-    assert.equal(sobras.rows[0].n, 0)
+    const leftovers = await h.pool.query('SELECT count(*)::int AS n FROM transactions WHERE user_id = $1', [old.body.user.id])
+    assert.equal(leftovers.rows[0].n, 0)
   })
 
-  it('não deixa trocar o e-mail nem a senha da conta de demonstração', async () => {
-    const { corpo } = await h.api('POST', '/demo')
-    const email = await h.api('PATCH', '/usuarios/me', { token: corpo.token, corpo: { email: 'alguem@teste.com' } })
+  it('does not let a demo account change its e-mail or password', async () => {
+    const { body } = await h.api('POST', '/demo')
+    const email = await h.api('PATCH', '/users/me', { token: body.token, body: { email: 'someone@test.com' } })
     assert.equal(email.status, 403)
-    const senha = await h.api('PUT', '/usuarios/me/senha', {
-      token: corpo.token,
-      corpo: { senha_atual: 'qualquer', nova_senha: 'nova-senha-123' },
+    const password = await h.api('PUT', '/users/me/password', {
+      token: body.token,
+      body: { current_password: 'anything', new_password: 'new-password-123' },
     })
-    assert.equal(senha.status, 403)
+    assert.equal(password.status, 403)
 
-    // o nome pode mudar
-    const nome = await h.api('PATCH', '/usuarios/me', { token: corpo.token, corpo: { nome: 'Visitante' } })
-    assert.equal(nome.status, 200)
-    assert.equal(nome.corpo.nome, 'Visitante')
+    // the name can change
+    const name = await h.api('PATCH', '/users/me', { token: body.token, body: { name: 'Visitor' } })
+    assert.equal(name.status, 200)
+    assert.equal(name.body.name, 'Visitor')
   })
 
-  it('bloqueia com 429 depois do limite por IP', async () => {
-    const { servidor, base } = await h.subirApp({ maxContasDemo: 2 })
+  it('blocks with 429 after the per-IP limit', async () => {
+    const { server, baseUrl } = await h.startApp({ maxDemoAccounts: 2 })
     try {
-      assert.equal((await h.api('POST', '/demo', { baseUrl: base })).status, 201)
-      assert.equal((await h.api('POST', '/demo', { baseUrl: base })).status, 201)
-      const bloqueada = await h.api('POST', '/demo', { baseUrl: base })
-      assert.equal(bloqueada.status, 429)
+      assert.equal((await h.api('POST', '/demo', { base: baseUrl })).status, 201)
+      assert.equal((await h.api('POST', '/demo', { base: baseUrl })).status, 201)
+      const blocked = await h.api('POST', '/demo', { base: baseUrl })
+      assert.equal(blocked.status, 429)
     } finally {
-      await new Promise((resolve) => servidor.close(resolve))
+      await new Promise((resolve) => server.close(resolve))
     }
   })
 })
 
-describe('transacoesDeExemplo', () => {
-  it('nunca cria transações no futuro e cobre os últimos 4 meses', () => {
-    const hoje = new Date('2026-03-02T12:00:00Z')
-    const lista = transacoesDeExemplo(hoje)
-    assert.ok(lista.every((t) => t.data <= '2026-03-02'))
-    assert.deepEqual([...new Set(lista.map((t) => t.data.slice(0, 7)))], ['2025-12', '2026-01', '2026-02', '2026-03'])
-    assert.ok(lista.every((t) => Number.isInteger(t.valor) && t.valor > 0))
+describe('sampleTransactions', () => {
+  it('never creates transactions in the future and covers the last 4 months', () => {
+    const today = new Date('2026-03-02T12:00:00Z')
+    const list = sampleTransactions(today)
+    assert.ok(list.every((t) => t.date <= '2026-03-02'))
+    assert.deepEqual([...new Set(list.map((t) => t.date.slice(0, 7)))], ['2025-12', '2026-01', '2026-02', '2026-03'])
+    assert.ok(list.every((t) => Number.isInteger(t.amount) && t.amount > 0))
   })
 })

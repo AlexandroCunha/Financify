@@ -1,45 +1,45 @@
 const pool = require('../db/pool')
 
-// Cria a conta de demonstração e as transações dela numa transação só, e aproveita
-// para apagar as contas de demonstração antigas (as transações vão junto, por CASCADE).
-async function criarComTransacoes({ nome, email, senhaHash, transacoes, horasDeVida }) {
-  const cliente = await pool.connect()
+// Creates the demo account and its transactions in a single database transaction, and also
+// deletes old demo accounts (their transactions go with them, by CASCADE).
+async function createWithTransactions({ name, email, passwordHash, transactions, lifetimeHours }) {
+  const client = await pool.connect()
   try {
-    await cliente.query('BEGIN')
-    await cliente.query(`DELETE FROM usuarios WHERE demo AND criado_em < now() - make_interval(hours => $1)`, [
-      horasDeVida,
+    await client.query('BEGIN')
+    await client.query(`DELETE FROM users WHERE demo AND created_at < now() - make_interval(hours => $1)`, [
+      lifetimeHours,
     ])
     const {
-      rows: [usuario],
-    } = await cliente.query(
-      `INSERT INTO usuarios (nome, email, senha, demo)
+      rows: [user],
+    } = await client.query(
+      `INSERT INTO users (name, email, password, demo)
        VALUES ($1, $2, $3, true)
-       RETURNING id, nome, email, demo, criado_em`,
-      [nome, email, senhaHash],
+       RETURNING id, name, email, demo, created_at`,
+      [name, email, passwordHash],
     )
-    await cliente.query(
-      `INSERT INTO transacoes (descricao, valor, data, tipo, categoria_id, usuario_id)
-       SELECT x.descricao, x.valor, x.data::date, x.tipo, c.id, $6
+    await client.query(
+      `INSERT INTO transactions (description, amount, date, type, category_id, user_id)
+       SELECT x.description, x.amount, x.date::date, x.type, c.id, $6
          FROM unnest($1::text[], $2::int[], $3::text[], $4::text[], $5::text[])
-              AS x(descricao, valor, data, tipo, categoria)
-         JOIN categorias c ON c.descricao = x.categoria`,
+              AS x(description, amount, date, type, category)
+         JOIN categories c ON c.name = x.category`,
       [
-        transacoes.map((t) => t.descricao),
-        transacoes.map((t) => t.valor),
-        transacoes.map((t) => t.data),
-        transacoes.map((t) => t.tipo),
-        transacoes.map((t) => t.categoria),
-        usuario.id,
+        transactions.map((t) => t.description),
+        transactions.map((t) => t.amount),
+        transactions.map((t) => t.date),
+        transactions.map((t) => t.type),
+        transactions.map((t) => t.category),
+        user.id,
       ],
     )
-    await cliente.query('COMMIT')
-    return usuario
-  } catch (erro) {
-    await cliente.query('ROLLBACK')
-    throw erro
+    await client.query('COMMIT')
+    return user
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
   } finally {
-    cliente.release()
+    client.release()
   }
 }
 
-module.exports = { criarComTransacoes }
+module.exports = { createWithTransactions }
