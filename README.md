@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="https://i.imgur.com/8Yv5svw.png" alt="Financify" width="640">
-</p>
+<h1 align="center">Financify</h1>
 
 <h3 align="center">Know where your money goes.</h3>
 
@@ -14,8 +12,12 @@
 </p>
 
 <p align="center">
+  <a href="https://financify-web-m2zy.onrender.com/?demo"><strong>Try the live demo</strong></a> (no sign-up: opens an account with sample data) · <a href="https://financify-web-m2zy.onrender.com">Open the app</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/AlexandroCunha/Financify/actions/workflows/ci.yml"><img src="https://github.com/AlexandroCunha/Financify/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/Node.js-22%2B-339933?logo=nodedotjs&logoColor=white" alt="Node.js 22+">
+  <img src="https://img.shields.io/badge/Node.js-22%20%7C%2024-339933?logo=nodedotjs&logoColor=white" alt="Node.js 22 or 24">
   <img src="https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white" alt="Express 5">
   <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black" alt="React 18">
   <img src="https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL">
@@ -28,15 +30,26 @@
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/painel.png" alt="Dashboard with balance, monthly chart and spending by category" width="720">
+  <img src="docs/screenshots/painel.png" alt="Dashboard for November: month balance compared with October, month-by-month bar chart, spending by category donut, monthly net line chart and latest transactions" width="760">
 </p>
 
 <details>
 <summary>More screenshots</summary>
 
 <p align="center">
-  <img src="docs/screenshots/transacoes.png" alt="Transactions list with filters and pagination" width="720">
-  <img src="docs/screenshots/nova-transacao.png" alt="New transaction form" width="720">
+  <img src="docs/screenshots/transacoes.png" alt="Transactions grouped by day, with filters and a colour per category" width="760">
+  <br><br>
+  <img src="docs/screenshots/nova-transacao.png" alt="New transaction form with an expense/income switch and categories as chips" width="760">
+  <br><br>
+  <img src="docs/screenshots/excluir.png" alt="Confirmation before deleting a transaction, showing its name and amount" width="760">
+  <br><br>
+  <img src="docs/screenshots/entrar.png" alt="Sign-in screen with the Try the demo button" width="760">
+  <br><br>
+  <img src="docs/screenshots/demonstracao.png" alt="Dashboard in a demo account, with the banner to create a real account" width="760">
+  <br><br>
+  <img src="docs/screenshots/painel-escuro.png" alt="Dashboard in dark mode" width="760">
+  <br><br>
+  <img src="docs/screenshots/celular.png" alt="Dashboard on a phone" width="300">
 </p>
 
 </details>
@@ -46,7 +59,9 @@
 - **Accounts:** sign-up, JWT login, profile editing, password change and account deletion.
 - **Transactions:** income and expenses with category, date and amount, plus filters (type, category, period), sorting and pagination.
 - **Insights:** statement with income, expenses, balance and totals per category, and a month-by-month summary ready for charts.
-- **Web app:** React dashboard with balance cards, a yearly chart and spending by category, plus transaction management and account settings.
+- **Dashboard by month:** pick a month and see its balance, income and expenses compared with the previous month, a month-by-month bar chart, spending by category and how much was left each month.
+- **Web app:** transactions grouped by day with a colour per category, a quick form with an expense/income switch, confirmations before deleting, dark mode and a layout that works on phones.
+- **Demo account:** anyone can try the app without signing up. Each visitor gets a separate account with sample data, deleted after 24 hours.
 - **Euro (€):** amounts are stored as integer cents, so there are no floating-point errors.
 - **Interactive docs:** Swagger UI at `/docs`.
 - **Secure by default:** secrets outside the code, bcrypt hashing, validation of every input, login rate limiting, CORS and security headers.
@@ -63,7 +78,7 @@
 
 ## Quick start
 
-**Requirements:** [Node.js](https://nodejs.org) 22+ (24 LTS recommended) and [Docker](https://www.docker.com/products/docker-desktop/) (or a local PostgreSQL, see below).
+**Requirements:** [Node.js](https://nodejs.org) 22 or 24 LTS (Node 26 does not work yet: a dependency of `jsonwebtoken` uses an API it removed) and [Docker](https://www.docker.com/products/docker-desktop/) (or a local PostgreSQL, see below).
 
 ```bash
 # 1. API
@@ -117,7 +132,8 @@ Set in `.env` (created by `npm run setup`):
 | `PORT` | no | `3000` | API port |
 | `CORS_ORIGIN` | no | | Allowed front-end origins, comma-separated |
 | `LOGIN_MAX_TENTATIVAS` | no | `10` | Login attempts per IP every 15 minutes (`0` disables the limit) |
-| `TRUST_PROXY` | no | | Use `1` in production behind a proxy (Render, Railway...) |
+| `DEMO_MAX_POR_IP` | no | `5` | Demo accounts per IP every 15 minutes (`0` disables the limit) |
+| `TRUST_PROXY` | no | | Use `1` in production behind a proxy (Render, Railway...), so the limits see the visitor's real IP |
 | `DATABASE_URL_TEST` | no | `DATABASE_URL` + `_test` | Database used by the tests |
 
 ## API
@@ -210,7 +226,7 @@ test/                  # end-to-end tests
 npm test
 ```
 
-The tests start the real API against a real PostgreSQL in a separate database (`financify_test`), cleaned before each test. They cover sign-up and login, authentication, validation, isolation between users, filters, statement, monthly summary and the docs. GitHub Actions runs the suite on every push and pull request.
+The tests start the real API against a real PostgreSQL in a separate database (`financify_test`), cleaned before each test. They cover sign-up and login, authentication, validation, isolation between users, filters, statement, monthly summary, demo accounts and the docs. GitHub Actions runs the suite on every push and pull request.
 
 ## Contributing
 
@@ -223,7 +239,7 @@ The tests start the real API against a real PostgreSQL in a separate database (`
 
 - [x] Web app with a dashboard
 - [x] Euro as the currency
-- [ ] Deployment with a public link
+- [x] Deployment with a public link and a demo account
 - [ ] Budgets per category and recurring transactions
 - [ ] Bank statement import (CSV/OFX)
 

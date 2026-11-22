@@ -2,7 +2,7 @@
 
 **English** · [Português](#português)
 
-Web interface (React + Vite) for the Financify API: login and sign-up, a dashboard with balance, month-by-month chart and spending by category, transactions CRUD with filters and pagination, and account settings. Amounts are shown in euro (€).
+Web interface (React + Vite) for the Financify API: sign-in, sign-up and a demo account; a dashboard by month (balance compared with the previous month, month-by-month bars, spending by category and monthly net line); transactions grouped by day with filters and pagination; and account settings. Charts are plain CSS and SVG, with no chart library. Amounts are shown in euro (€). Light and dark mode follow the system setting.
 
 ## Running
 
@@ -21,18 +21,19 @@ The API must allow the front-end origin in CORS (`CORS_ORIGIN=http://localhost:5
 
 ```
 src/
-├── main.jsx, App.jsx   # entry point, session and tabs
+├── main.jsx, App.jsx   # entry point, session, side menu and demo entry (?demo)
 ├── api.js              # API client (token, errors, expired session)
-├── format.js           # euro and date formatting/parsing
-├── components/         # Autenticacao, Painel, Transacoes, FormularioTransacao, Perfil
-└── styles.css
+├── format.js           # euro, date and month formatting/parsing
+├── categorias.js       # category colours, shared by charts, lists and the form
+├── components/         # Autenticacao, Painel, Graficos, Transacoes, FormularioTransacao, Confirmar, Perfil
+└── styles.css          # "Mar e sal" palette, with a dark-mode variant
 ```
 
 ---
 
 ## Português
 
-Interface web (React + Vite) para a API do Financify: login e cadastro, painel com saldo, gráfico mês a mês e gastos por categoria, CRUD de transações com filtros e paginação, e edição da conta. Os valores são exibidos em euro (€).
+Interface web (React + Vite) para a API do Financify: entrada, cadastro e conta de demonstração; painel por mês (saldo comparado com o mês anterior, barras mês a mês, gastos por categoria e linha de quanto sobrou em cada mês); transações agrupadas por dia com filtros e paginação; e edição da conta. Os gráficos são feitos só com CSS e SVG, sem biblioteca. Os valores são exibidos em euro (€). Os modos claro e escuro seguem a configuração do sistema.
 
 ### Como rodar
 
@@ -49,4 +50,4 @@ A API precisa liberar a origem do front no CORS (`CORS_ORIGIN=http://localhost:5
 
 ### Estrutura
 
-Veja a árvore acima: `api.js` é o cliente da API, `format.js` cuida de euro e datas e `components/` tem as telas.
+Veja a árvore acima: `api.js` é o cliente da API, `format.js` cuida de euro, datas e meses, `categorias.js` define a cor de cada categoria e `components/` tem as telas (`Graficos.jsx` reúne os gráficos e `Confirmar.jsx` a janela de confirmação).
