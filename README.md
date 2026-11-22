@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="https://i.imgur.com/8Yv5svw.png" alt="Financify" width="640">
-</p>
+<h1 align="center">Financify</h1>
 
 <h3 align="center">Know where your money goes.</h3>
 
@@ -43,7 +41,11 @@
   <br><br>
   <img src="docs/screenshots/nova-transacao.png" alt="New transaction form with an expense/income switch and categories as chips" width="760">
   <br><br>
+  <img src="docs/screenshots/excluir.png" alt="Confirmation before deleting a transaction, showing its name and amount" width="760">
+  <br><br>
   <img src="docs/screenshots/entrar.png" alt="Sign-in screen with the Try the demo button" width="760">
+  <br><br>
+  <img src="docs/screenshots/demonstracao.png" alt="Dashboard in a demo account, with the banner to create a real account" width="760">
   <br><br>
   <img src="docs/screenshots/painel-escuro.png" alt="Dashboard in dark mode" width="760">
   <br><br>
