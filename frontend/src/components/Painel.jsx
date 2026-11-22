@@ -1,97 +1,162 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api.js'
-import { formatarMoeda, NOMES_MESES } from '../format.js'
+import { corCategoria } from '../categorias.js'
+import {
+  deslocarMes,
+  formatarComSinal,
+  formatarData,
+  formatarMoeda,
+  limitesDoMes,
+  mesAtual,
+  nomeDoMes,
+  rotuloDoMes,
+} from '../format.js'
+import { GraficoMeses, LinhaResultado, Rosca } from './Graficos.jsx'
 
-function Grafico({ meses }) {
-  const maximo = Math.max(1, ...meses.flatMap((m) => [m.entrada, m.saida]))
-  return (
-    <div className="grafico" role="img" aria-label="Entradas e saídas por mês">
-      {meses.map((m, i) => (
-        <div className="coluna" key={m.mes} title={`${NOMES_MESES[i]}: entradas ${formatarMoeda(m.entrada)}, saídas ${formatarMoeda(m.saida)}`}>
-          <div className="barras">
-            <div className="barra entrada" style={{ height: `${(m.entrada / maximo) * 100}%` }} />
-            <div className="barra saida" style={{ height: `${(m.saida / maximo) * 100}%` }} />
-          </div>
-          <span>{NOMES_MESES[i]}</span>
-        </div>
-      ))}
-    </div>
-  )
+// Compara com o mês anterior; sem dados no mês anterior, não há o que comparar.
+function comparacao(atual, anterior, mesAnterior, { porcentagem }) {
+  if (anterior.entrada + anterior.saida === 0) return ''
+  const nome = `em ${nomeDoMes(mesAnterior)}`
+  const diferenca = atual - anterior.valor
+  if (diferenca === 0) return `Igual ao que foi ${nome}`
+  const mais = diferenca > 0 ? 'a mais' : 'a menos'
+  if (!porcentagem) return `${formatarMoeda(Math.abs(diferenca))} ${mais} que ${nome}`
+  if (anterior.valor === 0) return ''
+  return `${Math.round((Math.abs(diferenca) / anterior.valor) * 100)}% ${mais} que ${nome}`
 }
 
-export default function Painel() {
-  const [ano, setAno] = useState(new Date().getFullYear())
-  const [extrato, setExtrato] = useState(null)
-  const [resumo, setResumo] = useState(null)
+export default function Painel({ aoNovaTransacao, aoVerTransacoes }) {
+  const [mes, setMes] = useState(mesAtual())
+  const [dados, setDados] = useState(null)
   const [erro, setErro] = useState('')
+  const ano = Number(mes.slice(0, 4))
+  const mesAnterior = deslocarMes(mes, -1)
 
   useEffect(() => {
+    let cancelado = false
     setErro('')
-    Promise.all([api.extrato(), api.resumoMensal(ano)])
-      .then(([e, r]) => {
-        setExtrato(e)
-        setResumo(r)
+    Promise.all([
+      api.extrato(limitesDoMes(mes)),
+      api.extrato(limitesDoMes(mesAnterior)),
+      api.resumoMensal(ano),
+      api.transacoes({ ...limitesDoMes(mes), limite: 5, ordem: 'desc' }),
+    ])
+      .then(([extrato, anterior, resumo, recentes]) => {
+        if (!cancelado) setDados({ extrato, anterior, resumo, recentes: recentes.transacoes })
       })
-      .catch((err) => setErro(err.message))
-  }, [ano])
+      .catch((err) => !cancelado && setErro(err.message))
+    return () => {
+      cancelado = true
+    }
+  }, [mes, mesAnterior, ano])
 
-  if (erro) return <div className="alerta erro">{erro}</div>
-  if (!extrato || !resumo) return <p className="vazio">Carregando…</p>
+  const seletor = (
+    <div className="seletor-mes">
+      <button className="redondo" aria-label="Mês anterior" onClick={() => setMes(mesAnterior)}>‹</button>
+      <h1 className="titulo-pagina">{rotuloDoMes(mes)}</h1>
+      <button className="redondo" aria-label="Próximo mês" onClick={() => setMes(deslocarMes(mes, 1))}>›</button>
+    </div>
+  )
 
+  const cabecalho = (
+    <div className="linha-titulo">
+      {seletor}
+      <button className="primario" onClick={aoNovaTransacao}>Nova transação</button>
+    </div>
+  )
+
+  if (erro) return <>{cabecalho}<div className="alerta erro">{erro}</div></>
+  if (!dados) return <>{cabecalho}<p className="vazio">Carregando…</p></>
+
+  const { extrato, anterior, resumo, recentes } = dados
+  const vazio = extrato.entrada + extrato.saida === 0
   const gastos = extrato.por_categoria.filter((c) => c.tipo === 'saida').sort((a, b) => b.total - a.total)
-  const totalGastos = gastos.reduce((s, c) => s + c.total, 0)
+  const destaque = Number(mes.slice(5, 7)) - 1
 
   return (
     <>
-      <section className="cards">
-        <div className="cartao indicador">
-          <span>Saldo</span>
-          <strong className={extrato.saldo < 0 ? 'negativo' : ''}>{formatarMoeda(extrato.saldo)}</strong>
+      {cabecalho}
+
+      <section className="faixa">
+        <div className="indicador principal">
+          <span>Saldo do mês</span>
+          <strong className={extrato.saldo < 0 ? 'negativo' : ''}>
+            {extrato.saldo < 0 ? formatarComSinal(extrato.saldo) : formatarMoeda(extrato.saldo)}
+          </strong>
+          <small>{comparacao(extrato.saldo, { ...anterior, valor: anterior.saldo }, mesAnterior, { porcentagem: false })}</small>
         </div>
-        <div className="cartao indicador">
+        <div className="indicador">
           <span>Entradas</span>
-          <strong className="positivo">{formatarMoeda(extrato.entrada)}</strong>
+          <strong className="positivo">+ {formatarMoeda(extrato.entrada)}</strong>
+          <small>{comparacao(extrato.entrada, { ...anterior, valor: anterior.entrada }, mesAnterior, { porcentagem: true })}</small>
         </div>
-        <div className="cartao indicador">
+        <div className="indicador">
           <span>Saídas</span>
-          <strong className="negativo">{formatarMoeda(extrato.saida)}</strong>
+          <strong className="negativo">− {formatarMoeda(extrato.saida)}</strong>
+          <small>{comparacao(extrato.saida, { ...anterior, valor: anterior.saida }, mesAnterior, { porcentagem: true })}</small>
         </div>
       </section>
 
-      <section className="cartao">
-        <div className="linha-titulo">
-          <h2>Mês a mês</h2>
-          <div className="seletor-ano">
-            <button className="icone" aria-label="Ano anterior" onClick={() => setAno(ano - 1)}>‹</button>
-            <span>{ano}</span>
-            <button className="icone" aria-label="Próximo ano" onClick={() => setAno(ano + 1)}>›</button>
+      {vazio && (
+        <section className="cartao convite">
+          <h2>Nada registrado em {nomeDoMes(mes)}</h2>
+          <p>Registre uma entrada ou uma saída para ver o saldo e os gastos por categoria deste mês.</p>
+          <button className="primario" onClick={aoNovaTransacao}>Nova transação</button>
+        </section>
+      )}
+
+      <div className="grade-graficos">
+        <section className="cartao largo">
+          <div className="linha-titulo">
+            <h2>Mês a mês</h2>
+            <div className="legenda">
+              <span><i className="ponto entrada" /> Entradas</span>
+              <span><i className="ponto saida" /> Saídas</span>
+            </div>
           </div>
-        </div>
-        <div className="legenda">
-          <span><i className="ponto entrada" /> Entradas</span>
-          <span><i className="ponto saida" /> Saídas</span>
-        </div>
-        <Grafico meses={resumo.meses} />
-      </section>
+          <GraficoMeses meses={resumo.meses} ano={ano} destaque={destaque} />
+        </section>
 
-      <section className="cartao">
-        <h2>Gastos por categoria</h2>
-        {gastos.length === 0 ? (
-          <p className="vazio">Nenhuma saída registrada ainda.</p>
-        ) : (
-          <ul className="categorias">
-            {gastos.map((c) => (
-              <li key={c.categoria_id}>
-                <div className="linha">
-                  <span>{c.categoria_nome} <small>({c.quantidade})</small></span>
-                  <strong>{formatarMoeda(c.total)}</strong>
-                </div>
-                <div className="trilho"><div style={{ width: `${(c.total / totalGastos) * 100}%` }} /></div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <section className="cartao">
+          <h2>Gastos por categoria</h2>
+          {gastos.length === 0 ? (
+            <p className="vazio">Nenhuma saída neste mês.</p>
+          ) : (
+            <Rosca gastos={gastos} total={extrato.saida} />
+          )}
+        </section>
+      </div>
+
+      <div className="grade-graficos inverso">
+        <section className="cartao largo">
+          <h2>Quanto sobrou em cada mês</h2>
+          <p className="descricao">Entradas menos saídas em {ano}</p>
+          <LinhaResultado meses={resumo.meses} ano={ano} />
+        </section>
+
+        <section className="cartao">
+          <div className="linha-titulo">
+            <h2>Últimas transações</h2>
+            <button className="link" onClick={aoVerTransacoes}>Ver todas</button>
+          </div>
+          {recentes.length === 0 ? (
+            <p className="vazio">Sem transações em {nomeDoMes(mes)}.</p>
+          ) : (
+            <ul className="mini-lista">
+              {recentes.map((t) => (
+                <li key={t.id}>
+                  <i className="quadrado" style={{ background: corCategoria(t.categoria_nome) }} />
+                  <div className="info">
+                    <strong>{t.descricao}</strong>
+                    <small>{t.categoria_nome} · {formatarData(t.data)}</small>
+                  </div>
+                  <span className={`valor ${t.tipo}`}>{t.tipo === 'saida' ? '−' : '+'} {formatarMoeda(t.valor)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </>
   )
 }
