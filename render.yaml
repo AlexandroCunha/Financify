@@ -1,0 +1,59 @@
+# Blueprint do Render: API (Node) + banco PostgreSQL + front-end estático.
+# Como usar: Render → New → Blueprint → escolha este repositório.
+# Tudo no plano gratuito. Obs.: o Postgres gratuito do Render expira depois de 30 dias
+# e a API "dorme" após 15 min sem uso (a primeira requisição depois disso demora ~1 min).
+
+databases:
+  - name: financify-db
+    region: frankfurt
+    plan: free
+    databaseName: financify
+    user: financify
+
+services:
+  # API: as migrações rodam sozinhas quando o servidor sobe (src/server.js).
+  - type: web
+    name: financify-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    branch: feat/v2
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: financify-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      # Endereço do front-end liberado no CORS. Se o Render der outro nome ao front, ajuste aqui.
+      - key: CORS_ORIGIN
+        value: https://financify-web.onrender.com
+
+  # Front-end (React + Vite): gera frontend/dist e publica como site estático.
+  - type: web
+    name: financify-web
+    runtime: static
+    region: frankfurt
+    branch: feat/v2
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Endereço da API (embutido no build). Se o Render der outro nome à API, ajuste aqui.
+      - key: VITE_API_URL
+        value: https://financify-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
