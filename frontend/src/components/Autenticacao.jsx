@@ -35,46 +35,70 @@ export default function Autenticacao({ aoEntrar, aviso }) {
     setErros({})
   }
 
+  const entrando = modo === 'login'
+  const barras = [[62, 48], [62, 42], [66, 52], [62, 41], [70, 50], [62, 45], [62, 55], [68, 44]]
+
   return (
-    <div className="tela-cheia">
-      <form className="cartao auth" onSubmit={enviar}>
-        <div className="marca grande">
-          <span className="logo">F</span> Financify
+    <div className="entrada-tela">
+      <section className="entrada-marca">
+        <div className="marca grande">Financify</div>
+        <div>
+          <h1>Para onde vai cada euro, mês a mês</h1>
+          <p>Registre entradas e saídas, filtre por categoria e acompanhe o saldo de cada mês.</p>
+          <div className="entrada-barras" aria-hidden="true">
+            {barras.map(([e, s], i) => (
+              <div key={i}>
+                <i className="entrada" style={{ height: `${e}%` }} />
+                <i className="saida" style={{ height: `${s}%` }} />
+              </div>
+            ))}
+          </div>
         </div>
-        <p className="sub">{modo === 'login' ? 'Entre para ver suas finanças.' : 'Crie sua conta gratuita.'}</p>
-        {aviso && <div className="alerta info">{aviso}</div>}
-        {erro && <div className="alerta erro">{erro}</div>}
+        <small>Valores em euro (€)</small>
+      </section>
 
-        {modo === 'cadastro' && (
+      <section className="entrada-form">
+        <form className="auth" onSubmit={enviar}>
+          <div className="abas-pilula" role="group" aria-label="Acesso">
+            <button type="button" aria-pressed={entrando} onClick={() => !entrando && trocar()}>Entrar</button>
+            <button type="button" aria-pressed={!entrando} onClick={() => entrando && trocar()}>Criar conta</button>
+          </div>
+          <h2 className="titulo-modal">{entrando ? 'Entre na sua conta' : 'Crie sua conta'}</h2>
+          {aviso && <div className="alerta info">{aviso}</div>}
+          {erro && <div className="alerta erro">{erro}</div>}
+
+          {!entrando && (
+            <label>
+              Nome
+              <input required maxLength={100} autoComplete="name" {...campo('nome')} />
+              {erros.nome && <small className="erro-campo">{erros.nome}</small>}
+            </label>
+          )}
           <label>
-            Nome
-            <input required maxLength={100} autoComplete="name" {...campo('nome')} />
-            {erros.nome && <small className="erro-campo">{erros.nome}</small>}
+            E-mail
+            <input type="email" required autoComplete="email" placeholder="nome@exemplo.com" {...campo('email')} />
+            {erros.email && <small className="erro-campo">{erros.email}</small>}
           </label>
-        )}
-        <label>
-          E-mail
-          <input type="email" required autoComplete="email" {...campo('email')} />
-          {erros.email && <small className="erro-campo">{erros.email}</small>}
-        </label>
-        <label>
-          Senha
-          <input
-            type="password"
-            required
-            autoComplete={modo === 'login' ? 'current-password' : 'new-password'}
-            {...campo('senha')}
-          />
-          {erros.senha && <small className="erro-campo">{erros.senha}</small>}
-        </label>
+          <label>
+            Senha
+            <input
+              type="password"
+              required
+              autoComplete={entrando ? 'current-password' : 'new-password'}
+              {...campo('senha')}
+            />
+            {erros.senha && <small className="erro-campo">{erros.senha}</small>}
+          </label>
 
-        <button className="primario" disabled={enviando}>
-          {enviando ? 'Aguarde…' : modo === 'login' ? 'Entrar' : 'Criar conta'}
-        </button>
-        <button type="button" className="link centro" onClick={trocar}>
-          {modo === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
-        </button>
-      </form>
+          <button className="primario" disabled={enviando}>
+            {enviando ? 'Aguarde…' : entrando ? 'Entrar' : 'Criar conta'}
+          </button>
+          <p className="troca">
+            {entrando ? 'Ainda não tem conta?' : 'Já tem conta?'}{' '}
+            <button type="button" className="link" onClick={trocar}>{entrando ? 'Criar conta' : 'Entrar'}</button>
+          </p>
+        </form>
+      </section>
     </div>
   )
 }

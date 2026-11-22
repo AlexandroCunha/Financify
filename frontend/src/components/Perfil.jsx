@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../api.js'
+import Confirmar from './Confirmar.jsx'
 
 function useEnvio() {
   const [estado, setEstado] = useState({ erro: '', erros: {}, ok: '' })
@@ -32,6 +33,7 @@ export default function Perfil({ usuario, aoAtualizar, aoExcluir }) {
   const [estadoDados, enviarDados] = useEnvio()
   const [estadoSenha, enviarSenha] = useEnvio()
   const [estadoConta, enviarConta] = useEnvio()
+  const [confirmando, setConfirmando] = useState(false)
 
   async function salvarDados(e) {
     e.preventDefault()
@@ -45,14 +47,17 @@ export default function Perfil({ usuario, aoAtualizar, aoExcluir }) {
   }
 
   async function excluir() {
-    if (!window.confirm('Excluir sua conta e todas as suas transações? Isso não pode ser desfeito.')) return
-    if (await enviarConta(() => api.excluirConta(), '')) aoExcluir()
+    const ok = await enviarConta(() => api.excluirConta(), '')
+    setConfirmando(false)
+    if (ok) aoExcluir()
   }
 
   return (
     <div className="perfil">
+      <h1 className="titulo-pagina">Conta</h1>
       <form className="cartao" onSubmit={salvarDados}>
         <h2>Seus dados</h2>
+        <p className="descricao">O e-mail é o que você usa para entrar.</p>
         <Mensagens estado={estadoDados} />
         <label>
           Nome
@@ -64,11 +69,12 @@ export default function Perfil({ usuario, aoAtualizar, aoExcluir }) {
           <input type="email" required value={dados.email} onChange={(e) => setDados({ ...dados, email: e.target.value })} />
           {estadoDados.erros.email && <small className="erro-campo">{estadoDados.erros.email}</small>}
         </label>
-        <button className="primario">Salvar</button>
+        <button className="primario">Salvar alterações</button>
       </form>
 
       <form className="cartao" onSubmit={salvarSenha}>
-        <h2>Alterar senha</h2>
+        <h2>Senha</h2>
+        <p className="descricao">Use pelo menos 8 caracteres.</p>
         <Mensagens estado={estadoSenha} />
         <label>
           Senha atual
@@ -79,15 +85,26 @@ export default function Perfil({ usuario, aoAtualizar, aoExcluir }) {
           <input type="password" required autoComplete="new-password" value={senhas.nova_senha} onChange={(e) => setSenhas({ ...senhas, nova_senha: e.target.value })} />
           {estadoSenha.erros.nova_senha && <small className="erro-campo">{estadoSenha.erros.nova_senha}</small>}
         </label>
-        <button className="primario">Alterar senha</button>
+        <button className="primario">Trocar senha</button>
       </form>
 
       <section className="cartao zona-perigo">
         <h2>Excluir conta</h2>
-        <p>Apaga sua conta e todas as suas transações de forma permanente.</p>
+        <p className="descricao">Isso apaga sua conta e todas as suas transações. Não dá para desfazer.</p>
         <Mensagens estado={estadoConta} />
-        <button className="perigo-solido" onClick={excluir}>Excluir minha conta</button>
+        <button className="perigo-solido" onClick={() => setConfirmando(true)}>Excluir minha conta</button>
       </section>
+
+      {confirmando && (
+        <Confirmar
+          titulo="Excluir sua conta?"
+          texto="Sua conta e todas as suas transações serão apagadas. Não dá para desfazer."
+          rotuloConfirmar="Excluir conta"
+          perigo
+          aoConfirmar={excluir}
+          aoCancelar={() => setConfirmando(false)}
+        />
+      )}
     </div>
   )
 }
