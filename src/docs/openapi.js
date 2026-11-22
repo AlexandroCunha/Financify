@@ -67,6 +67,7 @@ module.exports = {
           id: { type: 'integer', example: 1 },
           nome: { type: 'string', example: 'Ana Souza' },
           email: { type: 'string', format: 'email', example: 'ana@email.com' },
+          demo: { type: 'boolean', description: 'true numa conta de demonstração', example: false },
           criado_em: { type: 'string', format: 'date-time' },
         },
       },
@@ -108,6 +109,14 @@ module.exports = {
         properties: {
           usuario: ref('Usuario'),
           token: { type: 'string', description: 'Envie no header Authorization: Bearer <token>' },
+        },
+      },
+      RespostaDeDemo: {
+        type: 'object',
+        properties: {
+          usuario: ref('Usuario'),
+          token: { type: 'string', description: 'Envie no header Authorization: Bearer <token>. Vale 2 horas.' },
+          expira_em_horas: { type: 'integer', example: 24, description: 'Depois disso a conta e os dados são apagados' },
         },
       },
       Categoria: {
@@ -228,6 +237,19 @@ module.exports = {
           400: dadosInvalidos,
           401: erro('E-mail ou senha inválidos'),
           429: erro('Muitas tentativas; tente mais tarde'),
+        },
+      },
+    },
+    '/demo': {
+      post: {
+        tags: ['Autenticação'],
+        summary: 'Criar uma conta de demonstração já logada',
+        description:
+          'Cria uma conta só para quem pediu, com transações de exemplo dos últimos meses, e devolve o token. ' +
+          'A conta é apagada depois de 24 horas. Nela não dá para trocar o e-mail nem a senha.',
+        responses: {
+          201: resposta('Conta de demonstração criada', ref('RespostaDeDemo')),
+          429: erro('Muitas contas de demonstração criadas por este IP; tente mais tarde'),
         },
       },
     },

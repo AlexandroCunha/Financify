@@ -35,7 +35,9 @@ export default function Perfil({ usuario, aoAtualizar, aoExcluir }) {
 
   async function salvarDados(e) {
     e.preventDefault()
-    await enviarDados(async () => aoAtualizar(await api.atualizarPerfil(dados)), 'Dados atualizados.')
+    // Na conta de demonstração só o nome muda.
+    const corpo = usuario.demo ? { nome: dados.nome } : dados
+    await enviarDados(async () => aoAtualizar(await api.atualizarPerfil(corpo)), 'Dados atualizados.')
   }
 
   async function salvarSenha(e) {
@@ -59,14 +61,17 @@ export default function Perfil({ usuario, aoAtualizar, aoExcluir }) {
           <input required maxLength={100} value={dados.nome} onChange={(e) => setDados({ ...dados, nome: e.target.value })} />
           {estadoDados.erros.nome && <small className="erro-campo">{estadoDados.erros.nome}</small>}
         </label>
-        <label>
-          E-mail
-          <input type="email" required value={dados.email} onChange={(e) => setDados({ ...dados, email: e.target.value })} />
-          {estadoDados.erros.email && <small className="erro-campo">{estadoDados.erros.email}</small>}
-        </label>
+        {!usuario.demo && (
+          <label>
+            E-mail
+            <input type="email" required value={dados.email} onChange={(e) => setDados({ ...dados, email: e.target.value })} />
+            {estadoDados.erros.email && <small className="erro-campo">{estadoDados.erros.email}</small>}
+          </label>
+        )}
         <button className="primario">Salvar</button>
       </form>
 
+      {!usuario.demo && (
       <form className="cartao" onSubmit={salvarSenha}>
         <h2>Alterar senha</h2>
         <Mensagens estado={estadoSenha} />
@@ -81,6 +86,7 @@ export default function Perfil({ usuario, aoAtualizar, aoExcluir }) {
         </label>
         <button className="primario">Alterar senha</button>
       </form>
+      )}
 
       <section className="cartao zona-perigo">
         <h2>Excluir conta</h2>

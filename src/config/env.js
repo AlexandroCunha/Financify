@@ -57,6 +57,7 @@ const config = {
     .map((origem) => origem.trim())
     .filter(Boolean),
   loginMaxTentativas: inteiro('LOGIN_MAX_TENTATIVAS', 10),
+  demoMaxPorIp: inteiro('DEMO_MAX_POR_IP', 5),
   trustProxy: trustProxy(process.env.TRUST_PROXY),
 }
 
