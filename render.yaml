@@ -36,7 +36,7 @@ services:
         generateValue: true
       # Endereço do front-end liberado no CORS. Se o Render der outro nome ao front, ajuste aqui.
       - key: CORS_ORIGIN
-        value: https://financify-web.onrender.com
+        value: https://financify-web-m2zy.onrender.com
 
   # Front-end (React + Vite): gera frontend/dist e publica como site estático.
   - type: web
@@ -51,7 +51,7 @@ services:
         value: "24"
       # Endereço da API (embutido no build). Se o Render der outro nome à API, ajuste aqui.
       - key: VITE_API_URL
-        value: https://financify-api.onrender.com
+        value: https://financify-api-m2zy.onrender.com
     routes:
       - type: rewrite
         source: /*
