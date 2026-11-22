@@ -14,8 +14,12 @@
 </p>
 
 <p align="center">
+  <a href="https://financify-web-m2zy.onrender.com/?demo"><strong>Experimente a demonstração</strong></a> (sem cadastro: abre uma conta com dados de exemplo) · <a href="https://financify-web-m2zy.onrender.com">Abrir o app</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/AlexandroCunha/Financify/actions/workflows/ci.yml"><img src="https://github.com/AlexandroCunha/Financify/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/Node.js-22%2B-339933?logo=nodedotjs&logoColor=white" alt="Node.js 22+">
+  <img src="https://img.shields.io/badge/Node.js-22%20%7C%2024-339933?logo=nodedotjs&logoColor=white" alt="Node.js 22 ou 24">
   <img src="https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white" alt="Express 5">
   <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black" alt="React 18">
   <img src="https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL">
@@ -28,15 +32,22 @@
 ## Capturas de tela
 
 <p align="center">
-  <img src="docs/screenshots/painel.png" alt="Painel com saldo, gráfico mensal e gastos por categoria" width="720">
+  <img src="docs/screenshots/painel.png" alt="Painel de novembro: saldo do mês comparado com outubro, gráfico de barras mês a mês, rosca de gastos por categoria, linha de quanto sobrou em cada mês e últimas transações" width="760">
 </p>
 
 <details>
 <summary>Mais capturas</summary>
 
 <p align="center">
-  <img src="docs/screenshots/transacoes.png" alt="Lista de transações com filtros e paginação" width="720">
-  <img src="docs/screenshots/nova-transacao.png" alt="Formulário de nova transação" width="720">
+  <img src="docs/screenshots/transacoes.png" alt="Transações agrupadas por dia, com filtros e uma cor por categoria" width="760">
+  <br><br>
+  <img src="docs/screenshots/nova-transacao.png" alt="Formulário de nova transação com a escolha entre saída e entrada e as categorias em botões" width="760">
+  <br><br>
+  <img src="docs/screenshots/entrar.png" alt="Tela de entrada com o botão Ver demonstração" width="760">
+  <br><br>
+  <img src="docs/screenshots/painel-escuro.png" alt="Painel no modo escuro" width="760">
+  <br><br>
+  <img src="docs/screenshots/celular.png" alt="Painel no celular" width="300">
 </p>
 
 </details>
@@ -46,7 +57,9 @@
 - **Contas:** cadastro, login com JWT, edição do perfil, troca de senha e exclusão da conta.
 - **Transações:** entradas e saídas com categoria, data e valor, com filtros (tipo, categoria, período), ordenação e paginação.
 - **Análises:** extrato com entradas, saídas, saldo e totais por categoria, e resumo mês a mês pronto para gráficos.
-- **App web:** painel em React com cartões de saldo, gráfico do ano e gastos por categoria, além do gerenciamento de transações e da conta.
+- **Painel por mês:** escolha um mês e veja o saldo, as entradas e as saídas comparados com o mês anterior, um gráfico de barras mês a mês, os gastos por categoria e quanto sobrou em cada mês.
+- **App web:** transações agrupadas por dia com uma cor por categoria, formulário rápido com a escolha entre saída e entrada, confirmação antes de excluir, modo escuro e layout que funciona no celular.
+- **Conta de demonstração:** qualquer pessoa pode testar o app sem se cadastrar. Cada visitante recebe uma conta separada com dados de exemplo, apagada depois de 24 horas.
 - **Euro (€):** os valores são guardados em centavos inteiros, sem erros de ponto flutuante.
 - **Documentação interativa:** Swagger em `/docs`.
 - **Seguro por padrão:** segredos fora do código, senhas com bcrypt, validação de todos os dados, limite de tentativas de login, CORS e cabeçalhos de segurança.
@@ -63,7 +76,7 @@
 
 ## Início rápido
 
-**Pré-requisitos:** [Node.js](https://nodejs.org) 22+ (recomendado: 24 LTS) e [Docker](https://www.docker.com/products/docker-desktop/) (ou um PostgreSQL local, veja abaixo).
+**Pré-requisitos:** [Node.js](https://nodejs.org) 22 ou 24 LTS (o Node 26 ainda não funciona: uma dependência do `jsonwebtoken` usa uma função que ele removeu) e [Docker](https://www.docker.com/products/docker-desktop/) (ou um PostgreSQL local, veja abaixo).
 
 ```bash
 # 1. API
@@ -117,7 +130,8 @@ Definida no `.env` (criado por `npm run setup`):
 | `PORT` | não | `3000` | Porta da API |
 | `CORS_ORIGIN` | não | | Endereços do front-end liberados, separados por vírgula |
 | `LOGIN_MAX_TENTATIVAS` | não | `10` | Tentativas de login por IP a cada 15 minutos (`0` desliga) |
-| `TRUST_PROXY` | não | | Use `1` em produção atrás de um proxy (Render, Railway...) |
+| `DEMO_MAX_POR_IP` | não | `5` | Contas de demonstração por IP a cada 15 minutos (`0` desliga) |
+| `TRUST_PROXY` | não | | Use `1` em produção atrás de um proxy (Render, Railway...), para os limites verem o IP real do visitante |
 | `DATABASE_URL_TEST` | não | `DATABASE_URL` + `_test` | Banco usado pelos testes |
 
 ## API
@@ -210,7 +224,7 @@ test/                  # testes de ponta a ponta
 npm test
 ```
 
-Os testes sobem a API de verdade e usam um PostgreSQL real, num banco separado (`financify_test`) que é limpo antes de cada teste. Eles cobrem cadastro e login, autenticação, validações, isolamento entre usuários, filtros, extrato, resumo mensal e a documentação. O GitHub Actions roda a suíte a cada push e pull request.
+Os testes sobem a API de verdade e usam um PostgreSQL real, num banco separado (`financify_test`) que é limpo antes de cada teste. Eles cobrem cadastro e login, autenticação, validações, isolamento entre usuários, filtros, extrato, resumo mensal, contas de demonstração e a documentação. O GitHub Actions roda a suíte a cada push e pull request.
 
 ## Como contribuir
 
@@ -223,7 +237,7 @@ Os testes sobem a API de verdade e usam um PostgreSQL real, num banco separado (
 
 - [x] App web com painel
 - [x] Euro como moeda
-- [ ] Deploy com link público
+- [x] Deploy com link público e conta de demonstração
 - [ ] Orçamento por categoria e transações recorrentes
 - [ ] Importação de extrato bancário (CSV/OFX)
 
