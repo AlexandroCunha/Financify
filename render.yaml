@@ -1,7 +1,7 @@
-# Blueprint do Render: API (Node) + banco PostgreSQL + front-end estático.
-# Como usar: Render → New → Blueprint → escolha este repositório.
-# Tudo no plano gratuito. Obs.: o Postgres gratuito do Render expira depois de 30 dias
-# e a API "dorme" após 15 min sem uso (a primeira requisição depois disso demora ~1 min).
+# Render Blueprint: API (Node) + PostgreSQL database + static front-end.
+# How to use: Render → New → Blueprint → pick this repository.
+# Everything is on the free plan. Note: Render's free Postgres expires after 30 days
+# and the API "sleeps" after 15 min without use (the first request after that takes ~1 min).
 
 databases:
   - name: financify-db
@@ -11,7 +11,7 @@ databases:
     user: financify
 
 services:
-  # API: as migrações rodam sozinhas quando o servidor sobe (src/server.js).
+  # API: migrations run by themselves when the server starts (src/server.js).
   - type: web
     name: financify-api
     runtime: node
@@ -34,12 +34,12 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
-      # Endereços liberados no CORS: o front-end e o portfólio (que chama /demo no console "Try the API").
-      # Se o Render der outro nome ao front, ajuste aqui.
+      # Addresses allowed by CORS: the front-end and the portfolio (which calls /demo in its "Try the API" console).
+      # If Render gives the front-end another name, change it here.
       - key: CORS_ORIGIN
         value: https://financify-web-m2zy.onrender.com,https://alexandrocunha.github.io
 
-  # Front-end (React + Vite): gera frontend/dist e publica como site estático.
+  # Front-end (React + Vite): builds frontend/dist and publishes it as a static site.
   - type: web
     name: financify-web
     runtime: static
@@ -50,7 +50,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "24"
-      # Endereço da API (embutido no build). Se o Render der outro nome à API, ajuste aqui.
+      # API address (baked into the build). If Render gives the API another name, change it here.
       - key: VITE_API_URL
         value: https://financify-api-m2zy.onrender.com
     routes:

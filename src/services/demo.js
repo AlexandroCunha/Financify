@@ -1,75 +1,75 @@
 const crypto = require('node:crypto')
 const bcrypt = require('bcrypt')
 const demo = require('../repositories/demo')
-const { gerarToken } = require('./autenticacao')
+const { createToken } = require('./auth')
 
-// A conta de demonstração vive 24 horas; o login dela dura 2 (depois, é só pedir outra).
-const HORAS_DE_VIDA = 24
-const DURACAO_DO_LOGIN = '2h'
-const MESES_COM_DADOS = 4 // os 3 meses anteriores e o mês atual
+// A demo account lives for 24 hours; its sign-in lasts 2 (after that, just ask for a new one).
+const LIFETIME_HOURS = 24
+const SIGN_IN_DURATION = '2h'
+const MONTHS_WITH_DATA = 4 // the previous 3 months and the current one
 
-// Gastos de um mês típico. dia: dia do mês; valor: em centavos de euro.
-const MES_TIPICO = [
-  { dia: 1, descricao: 'Salário', valor: 325000, tipo: 'entrada', categoria: 'Salário' },
-  { dia: 1, descricao: 'Aluguel', valor: 95000, tipo: 'saida', categoria: 'Casa' },
-  { dia: 3, descricao: 'Passe mensal de transporte', valor: 9000, tipo: 'saida', categoria: 'Transporte' },
-  { dia: 4, descricao: 'Supermercado', valor: 8740, tipo: 'saida', categoria: 'Mercado' },
-  { dia: 6, descricao: 'Streaming de música', valor: 1199, tipo: 'saida', categoria: 'Assinaturas e Serviços' },
-  { dia: 8, descricao: 'Almoço com colegas', valor: 2450, tipo: 'saida', categoria: 'Alimentação' },
-  { dia: 11, descricao: 'Supermercado', valor: 6320, tipo: 'saida', categoria: 'Mercado' },
-  { dia: 12, descricao: 'Internet', valor: 3999, tipo: 'saida', categoria: 'Assinaturas e Serviços' },
-  { dia: 14, descricao: 'Farmácia', valor: 1850, tipo: 'saida', categoria: 'Saúde' },
-  { dia: 16, descricao: 'Cinema', valor: 2400, tipo: 'saida', categoria: 'Lazer' },
-  { dia: 18, descricao: 'Supermercado', valor: 7110, tipo: 'saida', categoria: 'Mercado' },
-  { dia: 20, descricao: 'Projeto freelance', valor: 45000, tipo: 'entrada', categoria: 'Vendas', aCadaDoisMeses: true },
-  { dia: 22, descricao: 'Jantar fora', valor: 5600, tipo: 'saida', categoria: 'Alimentação' },
-  { dia: 25, descricao: 'Supermercado', valor: 5480, tipo: 'saida', categoria: 'Mercado' },
-  { dia: 27, descricao: 'Curso online', valor: 2900, tipo: 'saida', categoria: 'Educação', aCadaDoisMeses: true },
+// A typical month. day: day of the month; amount: in euro cents.
+const TYPICAL_MONTH = [
+  { day: 1, description: 'Salary', amount: 325000, type: 'income', category: 'Salary' },
+  { day: 1, description: 'Rent', amount: 95000, type: 'expense', category: 'Home' },
+  { day: 3, description: 'Monthly travel pass', amount: 9000, type: 'expense', category: 'Transport' },
+  { day: 4, description: 'Supermarket', amount: 8740, type: 'expense', category: 'Groceries' },
+  { day: 6, description: 'Music streaming', amount: 1199, type: 'expense', category: 'Subscriptions and Services' },
+  { day: 8, description: 'Lunch with colleagues', amount: 2450, type: 'expense', category: 'Food' },
+  { day: 11, description: 'Supermarket', amount: 6320, type: 'expense', category: 'Groceries' },
+  { day: 12, description: 'Broadband', amount: 3999, type: 'expense', category: 'Subscriptions and Services' },
+  { day: 14, description: 'Pharmacy', amount: 1850, type: 'expense', category: 'Health' },
+  { day: 16, description: 'Cinema', amount: 2400, type: 'expense', category: 'Leisure' },
+  { day: 18, description: 'Supermarket', amount: 7110, type: 'expense', category: 'Groceries' },
+  { day: 20, description: 'Freelance project', amount: 45000, type: 'income', category: 'Sales', everyOtherMonth: true },
+  { day: 22, description: 'Dinner out', amount: 5600, type: 'expense', category: 'Food' },
+  { day: 25, description: 'Supermarket', amount: 5480, type: 'expense', category: 'Groceries' },
+  { day: 27, description: 'Online course', amount: 2900, type: 'expense', category: 'Education', everyOtherMonth: true },
 ]
 
-const doisDigitos = (n) => String(n).padStart(2, '0')
+const twoDigits = (n) => String(n).padStart(2, '0')
 
-// Transações de exemplo dos últimos meses, até hoje (nada no futuro).
-// Os valores variam um pouco de mês para mês, para o gráfico não ficar reto.
-function transacoesDeExemplo(hoje = new Date()) {
-  const transacoes = []
-  for (let atras = MESES_COM_DADOS - 1; atras >= 0; atras -= 1) {
-    const referencia = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - atras, 1))
-    const ano = referencia.getUTCFullYear()
-    const mes = referencia.getUTCMonth()
-    const variacao = 1 + ((mes % 3) - 1) * 0.06
-    for (const item of MES_TIPICO) {
-      if (item.aCadaDoisMeses && mes % 2 === 1) continue
-      if (atras === 0 && item.dia > hoje.getUTCDate()) continue
-      const fixo = item.tipo === 'entrada' || item.categoria === 'Casa' || item.categoria === 'Assinaturas e Serviços'
-      transacoes.push({
-        descricao: item.descricao,
-        valor: fixo ? item.valor : Math.round(item.valor * variacao),
-        data: `${ano}-${doisDigitos(mes + 1)}-${doisDigitos(item.dia)}`,
-        tipo: item.tipo,
-        categoria: item.categoria,
+// Sample transactions for the last few months, up to today (nothing in the future).
+// Amounts change a little from month to month, so the chart is not flat.
+function sampleTransactions(today = new Date()) {
+  const transactions = []
+  for (let monthsAgo = MONTHS_WITH_DATA - 1; monthsAgo >= 0; monthsAgo -= 1) {
+    const reference = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - monthsAgo, 1))
+    const year = reference.getUTCFullYear()
+    const month = reference.getUTCMonth()
+    const variation = 1 + ((month % 3) - 1) * 0.06
+    for (const item of TYPICAL_MONTH) {
+      if (item.everyOtherMonth && month % 2 === 1) continue
+      if (monthsAgo === 0 && item.day > today.getUTCDate()) continue
+      const fixed = item.type === 'income' || item.category === 'Home' || item.category === 'Subscriptions and Services'
+      transactions.push({
+        description: item.description,
+        amount: fixed ? item.amount : Math.round(item.amount * variation),
+        date: `${year}-${twoDigits(month + 1)}-${twoDigits(item.day)}`,
+        type: item.type,
+        category: item.category,
       })
     }
   }
-  return transacoes
+  return transactions
 }
 
-async function criarContaDemo() {
+async function createDemoAccount() {
   const id = crypto.randomBytes(8).toString('hex')
-  // Senha aleatória que ninguém conhece: a conta só é acessada pelo token devolvido aqui.
-  const senhaHash = await bcrypt.hash(crypto.randomBytes(24).toString('hex'), 10)
-  const usuario = await demo.criarComTransacoes({
-    nome: 'Conta demo',
+  // A random password nobody knows: the account is only reached through the token returned here.
+  const passwordHash = await bcrypt.hash(crypto.randomBytes(24).toString('hex'), 10)
+  const user = await demo.createWithTransactions({
+    name: 'Demo account',
     email: `demo-${id}@financify.invalid`,
-    senhaHash,
-    transacoes: transacoesDeExemplo(),
-    horasDeVida: HORAS_DE_VIDA,
+    passwordHash,
+    transactions: sampleTransactions(),
+    lifetimeHours: LIFETIME_HOURS,
   })
   return {
-    usuario,
-    token: gerarToken(usuario.id, { expiraEm: DURACAO_DO_LOGIN }),
-    expira_em_horas: HORAS_DE_VIDA,
+    user,
+    token: createToken(user.id, { expiresIn: SIGN_IN_DURATION }),
+    expires_in_hours: LIFETIME_HOURS,
   }
 }
 
-module.exports = { criarContaDemo, transacoesDeExemplo, HORAS_DE_VIDA }
+module.exports = { createDemoAccount, sampleTransactions, LIFETIME_HOURS }

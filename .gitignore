@@ -1,16 +1,16 @@
 node_modules/
 
-# variáveis de ambiente (segredos)
+# environment variables (secrets)
 .env
 .env.*
 !.env.example
 
-# sistema e editores
+# OS and editors
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 
-# logs e cobertura de testes
+# logs and test coverage
 *.log
 coverage/

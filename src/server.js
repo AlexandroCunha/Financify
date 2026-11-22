@@ -3,47 +3,47 @@ const http = require('node:http')
 let config
 try {
   config = require('./config/env')
-} catch (erro) {
-  console.error(erro.message) // ex.: .env faltando ou JWT_SECRET curto demais
+} catch (error) {
+  console.error(error.message) // e.g. missing .env or JWT_SECRET too short
   process.exit(1)
 }
 
 const pool = require('./db/pool')
-const { prepararBanco, explicarErroDoBanco } = require('./db/migrar')
-const { criarApp } = require('./app')
+const { prepareDatabase, explainDatabaseError } = require('./db/migrate')
+const { createApp } = require('./app')
 
-async function iniciar() {
+async function start() {
   try {
-    await prepararBanco(pool, config.databaseUrl, { log: (mensagem) => console.log(`[banco] ${mensagem}`) })
-  } catch (erro) {
-    console.error(`[banco] ${explicarErroDoBanco(erro)}`)
+    await prepareDatabase(pool, config.databaseUrl, { log: (message) => console.log(`[db] ${message}`) })
+  } catch (error) {
+    console.error(`[db] ${explainDatabaseError(error)}`)
     process.exit(1)
   }
 
-  const servidor = http.createServer(criarApp())
+  const server = http.createServer(createApp())
 
-  servidor.on('error', (erro) => {
-    if (erro.code === 'EADDRINUSE') {
-      console.error(`A porta ${config.porta} já está em uso. Feche o outro processo ou mude PORT no .env.`)
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${config.port} is already in use. Stop the other process or change PORT in .env.`)
     } else {
-      console.error(erro)
+      console.error(error)
     }
     process.exit(1)
   })
 
-  servidor.listen(config.porta, () => {
-    console.log(`Financify API rodando em http://localhost:${config.porta}`)
-    console.log(`Documentação: http://localhost:${config.porta}/docs`)
+  server.listen(config.port, () => {
+    console.log(`Financify API running at http://localhost:${config.port}`)
+    console.log(`Docs: http://localhost:${config.port}/docs`)
   })
 
-  // Encerramento limpo (Ctrl+C, deploy, reinício do node --watch).
-  const encerrar = (sinal) => {
-    console.log(`\n${sinal} recebido, encerrando...`)
-    servidor.close(() => pool.end().finally(() => process.exit(0)))
+  // Clean shutdown (Ctrl+C, deploys, node --watch restarts).
+  const shutdown = (signal) => {
+    console.log(`\n${signal} received, shutting down...`)
+    server.close(() => pool.end().finally(() => process.exit(0)))
     setTimeout(() => process.exit(1), 10_000).unref()
   }
-  process.once('SIGINT', encerrar)
-  process.once('SIGTERM', encerrar)
+  process.once('SIGINT', shutdown)
+  process.once('SIGTERM', shutdown)
 }
 
-iniciar()
+start()

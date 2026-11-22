@@ -1,28 +1,29 @@
-// Especificação OpenAPI 3.1 da API: servida em /docs/openapi.json e exibida no Swagger UI em /docs.
+// OpenAPI 3.1 spec of the API: served at /docs/openapi.json and shown in Swagger UI at /docs.
 const { version } = require('../../package.json')
 
-const ref = (nome) => ({ $ref: `#/components/schemas/${nome}` })
-const resposta = (descricao, schema) =>
-  schema ? { description: descricao, content: { 'application/json': { schema } } } : { description: descricao }
-const erro = (descricao) => resposta(descricao, ref('Erro'))
-const corpo = (schema, example) => ({ required: true, content: { 'application/json': { schema, example } } })
+const ref = (name) => ({ $ref: `#/components/schemas/${name}` })
+const response = (description, schema) =>
+  schema ? { description, content: { 'application/json': { schema } } } : { description }
+const error = (description) => response(description, ref('Error'))
+const body = (schema, example) => ({ required: true, content: { 'application/json': { schema, example } } })
 
-const comLogin = [{ bearerAuth: [] }]
-const semLogin = erro('Token ausente, inválido ou expirado')
-const dadosInvalidos = erro('Dados inválidos (veja o campo "erros")')
+const signedIn = [{ bearerAuth: [] }]
+const notSignedIn = error('Missing, invalid or expired token')
+const invalidData = error('Invalid data (see the "errors" field)')
 
-const parametroId = { name: 'id', in: 'path', required: true, schema: { type: 'integer', minimum: 1 } }
-const parametrosDePeriodo = [
-  { name: 'de', in: 'query', description: 'Data inicial (AAAA-MM-DD)', schema: { type: 'string', format: 'date' } },
-  { name: 'ate', in: 'query', description: 'Data final (AAAA-MM-DD)', schema: { type: 'string', format: 'date' } },
+const idParam = { name: 'id', in: 'path', required: true, schema: { type: 'integer', minimum: 1 } }
+const periodParams = [
+  { name: 'from', in: 'query', description: 'Start date (YYYY-MM-DD)', schema: { type: 'string', format: 'date' } },
+  { name: 'to', in: 'query', description: 'End date (YYYY-MM-DD)', schema: { type: 'string', format: 'date' } },
 ]
+const TYPES = ['income', 'expense']
 
-const exemploTransacao = {
-  descricao: 'Salário de outubro',
-  valor: 500000,
-  data: '2026-10-05',
-  categoria_id: 14,
-  tipo: 'entrada',
+const transactionExample = {
+  description: 'October salary',
+  amount: 500000,
+  date: '2026-10-05',
+  category_id: 14,
+  type: 'income',
 }
 
 module.exports = {
@@ -31,182 +32,177 @@ module.exports = {
     title: 'Financify API',
     version,
     description:
-      'API REST para controle de finanças pessoais.\n\n' +
-      '- Valores monetários são **inteiros em centavos** (1050 = € 10,50).\n' +
-      '- Datas usam o formato **AAAA-MM-DD**.\n\n' +
-      'Para testar por aqui: cadastre um usuário, faça login, copie o `token` e clique em **Authorize**.',
+      'REST API for personal finances.\n\n' +
+      '- Amounts are **whole numbers in cents** (1050 = €10.50).\n' +
+      '- Dates use the **YYYY-MM-DD** format.\n\n' +
+      'To try it here: sign up, sign in, copy the `token` and click **Authorize**. ' +
+      'Or call `POST /demo` to get a demo account with sample data.',
   },
   servers: [{ url: '/' }],
-  tags: [
-    { name: 'Autenticação' },
-    { name: 'Usuários' },
-    { name: 'Categorias' },
-    { name: 'Transações' },
-    { name: 'Sistema' },
-  ],
+  tags: [{ name: 'Auth' }, { name: 'Users' }, { name: 'Categories' }, { name: 'Transactions' }, { name: 'System' }],
   components: {
     securitySchemes: {
       bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
     },
     schemas: {
-      Erro: {
+      Error: {
         type: 'object',
-        required: ['mensagem'],
+        required: ['message'],
         properties: {
-          mensagem: { type: 'string', example: 'Dados inválidos.' },
-          erros: {
+          message: { type: 'string', example: 'Invalid data.' },
+          errors: {
             type: 'object',
             additionalProperties: { type: 'string' },
-            example: { email: 'deve ser um e-mail válido' },
+            example: { email: 'must be a valid e-mail' },
           },
         },
       },
-      Usuario: {
+      User: {
         type: 'object',
         properties: {
           id: { type: 'integer', example: 1 },
-          nome: { type: 'string', example: 'Ana Souza' },
+          name: { type: 'string', example: 'Ana Souza' },
           email: { type: 'string', format: 'email', example: 'ana@email.com' },
-          demo: { type: 'boolean', description: 'true numa conta de demonstração', example: false },
-          criado_em: { type: 'string', format: 'date-time' },
+          demo: { type: 'boolean', description: 'true in a demo account', example: false },
+          created_at: { type: 'string', format: 'date-time' },
         },
       },
-      NovoUsuario: {
+      NewUser: {
         type: 'object',
-        required: ['nome', 'email', 'senha'],
+        required: ['name', 'email', 'password'],
         properties: {
-          nome: { type: 'string', maxLength: 100 },
+          name: { type: 'string', maxLength: 100 },
           email: { type: 'string', format: 'email' },
-          senha: { type: 'string', minLength: 8, maxLength: 72 },
+          password: { type: 'string', minLength: 8, maxLength: 72 },
         },
       },
-      AtualizacaoDeUsuario: {
+      UserUpdate: {
         type: 'object',
         minProperties: 1,
         properties: {
-          nome: { type: 'string', maxLength: 100 },
+          name: { type: 'string', maxLength: 100 },
           email: { type: 'string', format: 'email' },
         },
       },
-      TrocaDeSenha: {
+      PasswordChange: {
         type: 'object',
-        required: ['senha_atual', 'nova_senha'],
+        required: ['current_password', 'new_password'],
         properties: {
-          senha_atual: { type: 'string' },
-          nova_senha: { type: 'string', minLength: 8, maxLength: 72 },
+          current_password: { type: 'string' },
+          new_password: { type: 'string', minLength: 8, maxLength: 72 },
         },
       },
-      Credenciais: {
+      Credentials: {
         type: 'object',
-        required: ['email', 'senha'],
+        required: ['email', 'password'],
         properties: {
           email: { type: 'string', format: 'email' },
-          senha: { type: 'string' },
+          password: { type: 'string' },
         },
       },
-      RespostaDeLogin: {
+      LoginResponse: {
         type: 'object',
         properties: {
-          usuario: ref('Usuario'),
-          token: { type: 'string', description: 'Envie no header Authorization: Bearer <token>' },
+          user: ref('User'),
+          token: { type: 'string', description: 'Send it in the header Authorization: Bearer <token>' },
         },
       },
-      RespostaDeDemo: {
+      DemoResponse: {
         type: 'object',
         properties: {
-          usuario: ref('Usuario'),
-          token: { type: 'string', description: 'Envie no header Authorization: Bearer <token>. Vale 2 horas.' },
-          expira_em_horas: { type: 'integer', example: 24, description: 'Depois disso a conta e os dados são apagados' },
+          user: ref('User'),
+          token: { type: 'string', description: 'Send it in the header Authorization: Bearer <token>. Valid for 2 hours.' },
+          expires_in_hours: { type: 'integer', example: 24, description: 'After that the account and its data are deleted' },
         },
       },
-      Categoria: {
+      Category: {
         type: 'object',
         properties: {
           id: { type: 'integer', example: 14 },
-          descricao: { type: 'string', example: 'Salário' },
+          name: { type: 'string', example: 'Salary' },
         },
       },
-      NovaTransacao: {
+      NewTransaction: {
         type: 'object',
-        required: ['descricao', 'valor', 'data', 'categoria_id', 'tipo'],
+        required: ['description', 'amount', 'date', 'category_id', 'type'],
         properties: {
-          descricao: { type: 'string', maxLength: 255 },
-          valor: { type: 'integer', minimum: 1, description: 'Em centavos' },
-          data: { type: 'string', format: 'date' },
-          categoria_id: { type: 'integer', minimum: 1 },
-          tipo: { type: 'string', enum: ['entrada', 'saida'] },
+          description: { type: 'string', maxLength: 255 },
+          amount: { type: 'integer', minimum: 1, description: 'In cents' },
+          date: { type: 'string', format: 'date' },
+          category_id: { type: 'integer', minimum: 1 },
+          type: { type: 'string', enum: TYPES },
         },
       },
-      Transacao: {
+      Transaction: {
         type: 'object',
         properties: {
           id: { type: 'integer', example: 1 },
-          tipo: { type: 'string', enum: ['entrada', 'saida'] },
-          descricao: { type: 'string', example: 'Salário de outubro' },
-          valor: { type: 'integer', example: 500000, description: 'Em centavos' },
-          data: { type: 'string', format: 'date', example: '2026-10-05' },
-          categoria_id: { type: 'integer', example: 14 },
-          categoria_nome: { type: 'string', example: 'Salário' },
-          criado_em: { type: 'string', format: 'date-time' },
-          atualizado_em: { type: 'string', format: 'date-time' },
+          type: { type: 'string', enum: TYPES },
+          description: { type: 'string', example: 'October salary' },
+          amount: { type: 'integer', example: 500000, description: 'In cents' },
+          date: { type: 'string', format: 'date', example: '2026-10-05' },
+          category_id: { type: 'integer', example: 14 },
+          category_name: { type: 'string', example: 'Salary' },
+          created_at: { type: 'string', format: 'date-time' },
+          updated_at: { type: 'string', format: 'date-time' },
         },
       },
-      ListaDeTransacoes: {
+      TransactionList: {
         type: 'object',
         properties: {
-          transacoes: { type: 'array', items: ref('Transacao') },
-          paginacao: {
+          transactions: { type: 'array', items: ref('Transaction') },
+          pagination: {
             type: 'object',
             properties: {
-              pagina: { type: 'integer', example: 1 },
-              limite: { type: 'integer', example: 20 },
+              page: { type: 'integer', example: 1 },
+              limit: { type: 'integer', example: 20 },
               total: { type: 'integer', example: 42 },
-              total_paginas: { type: 'integer', example: 3 },
+              total_pages: { type: 'integer', example: 3 },
             },
           },
         },
       },
-      Extrato: {
+      Statement: {
         type: 'object',
         properties: {
-          periodo: {
+          period: {
             type: 'object',
             properties: {
-              de: { type: ['string', 'null'], format: 'date' },
-              ate: { type: ['string', 'null'], format: 'date' },
+              from: { type: ['string', 'null'], format: 'date' },
+              to: { type: ['string', 'null'], format: 'date' },
             },
           },
-          entrada: { type: 'integer', example: 500000 },
-          saida: { type: 'integer', example: 12050 },
-          saldo: { type: 'integer', example: 487950 },
-          por_categoria: {
+          income: { type: 'integer', example: 500000 },
+          expenses: { type: 'integer', example: 12050 },
+          balance: { type: 'integer', example: 487950 },
+          by_category: {
             type: 'array',
             items: {
               type: 'object',
               properties: {
-                categoria_id: { type: 'integer' },
-                categoria_nome: { type: 'string' },
-                tipo: { type: 'string', enum: ['entrada', 'saida'] },
+                category_id: { type: 'integer' },
+                category_name: { type: 'string' },
+                type: { type: 'string', enum: TYPES },
                 total: { type: 'integer' },
-                quantidade: { type: 'integer' },
+                count: { type: 'integer' },
               },
             },
           },
         },
       },
-      ResumoMensal: {
+      MonthlySummary: {
         type: 'object',
         properties: {
-          ano: { type: 'integer', example: 2026 },
-          meses: {
+          year: { type: 'integer', example: 2026 },
+          months: {
             type: 'array',
             items: {
               type: 'object',
               properties: {
-                mes: { type: 'string', example: '2026-10' },
-                entrada: { type: 'integer' },
-                saida: { type: 'integer' },
-                saldo: { type: 'integer' },
+                month: { type: 'string', example: '2026-10' },
+                income: { type: 'integer' },
+                expenses: { type: 'integer' },
+                balance: { type: 'integer' },
               },
             },
           },
@@ -215,170 +211,176 @@ module.exports = {
     },
   },
   paths: {
-    '/usuarios': {
+    '/users': {
       post: {
-        tags: ['Usuários'],
-        summary: 'Cadastrar usuário',
-        requestBody: corpo(ref('NovoUsuario'), { nome: 'Ana Souza', email: 'ana@email.com', senha: 'senha-forte-123' }),
+        tags: ['Users'],
+        summary: 'Sign up',
+        requestBody: body(ref('NewUser'), { name: 'Ana Souza', email: 'ana@email.com', password: 'strong-password-123' }),
         responses: {
-          201: resposta('Usuário criado', ref('Usuario')),
-          400: dadosInvalidos,
-          409: erro('Já existe uma conta com este e-mail'),
+          201: response('User created', ref('User')),
+          400: invalidData,
+          409: error('An account with this e-mail already exists'),
         },
       },
     },
     '/login': {
       post: {
-        tags: ['Autenticação'],
-        summary: 'Fazer login e obter o token',
-        requestBody: corpo(ref('Credenciais'), { email: 'ana@email.com', senha: 'senha-forte-123' }),
+        tags: ['Auth'],
+        summary: 'Sign in and get a token',
+        requestBody: body(ref('Credentials'), { email: 'ana@email.com', password: 'strong-password-123' }),
         responses: {
-          200: resposta('Login feito', ref('RespostaDeLogin')),
-          400: dadosInvalidos,
-          401: erro('E-mail ou senha inválidos'),
-          429: erro('Muitas tentativas; tente mais tarde'),
+          200: response('Signed in', ref('LoginResponse')),
+          400: invalidData,
+          401: error('Invalid e-mail or password'),
+          429: error('Too many attempts; try again later'),
         },
       },
     },
     '/demo': {
       post: {
-        tags: ['Autenticação'],
-        summary: 'Criar uma conta de demonstração já logada',
+        tags: ['Auth'],
+        summary: 'Create a demo account, already signed in',
         description:
-          'Cria uma conta só para quem pediu, com transações de exemplo dos últimos meses, e devolve o token. ' +
-          'A conta é apagada depois de 24 horas. Nela não dá para trocar o e-mail nem a senha.',
+          'Creates an account just for the caller, with sample transactions from the last few months, and returns the token. ' +
+          'The account is deleted after 24 hours. Its e-mail and password cannot be changed.',
         responses: {
-          201: resposta('Conta de demonstração criada', ref('RespostaDeDemo')),
-          429: erro('Muitas contas de demonstração criadas por este IP; tente mais tarde'),
+          201: response('Demo account created', ref('DemoResponse')),
+          429: error('Too many demo accounts created from this IP; try again later'),
         },
       },
     },
-    '/usuarios/me': {
+    '/users/me': {
       get: {
-        tags: ['Usuários'],
-        summary: 'Detalhar o usuário logado',
-        security: comLogin,
-        responses: { 200: resposta('Usuário logado', ref('Usuario')), 401: semLogin },
+        tags: ['Users'],
+        summary: 'Get the signed-in user',
+        security: signedIn,
+        responses: { 200: response('Signed-in user', ref('User')), 401: notSignedIn },
       },
       patch: {
-        tags: ['Usuários'],
-        summary: 'Atualizar nome e/ou e-mail',
-        security: comLogin,
-        requestBody: corpo(ref('AtualizacaoDeUsuario'), { nome: 'Ana Maria Souza' }),
+        tags: ['Users'],
+        summary: 'Update name and/or e-mail',
+        security: signedIn,
+        requestBody: body(ref('UserUpdate'), { name: 'Ana Maria Souza' }),
         responses: {
-          200: resposta('Usuário atualizado', ref('Usuario')),
-          400: dadosInvalidos,
-          401: semLogin,
-          409: erro('Já existe uma conta com este e-mail'),
+          200: response('User updated', ref('User')),
+          400: invalidData,
+          401: notSignedIn,
+          403: error('Not available in a demo account (e-mail)'),
+          409: error('An account with this e-mail already exists'),
         },
       },
       delete: {
-        tags: ['Usuários'],
-        summary: 'Excluir a própria conta (e todas as transações)',
-        security: comLogin,
-        responses: { 204: resposta('Conta excluída'), 401: semLogin },
+        tags: ['Users'],
+        summary: 'Delete your own account (and all its transactions)',
+        security: signedIn,
+        responses: { 204: response('Account deleted'), 401: notSignedIn },
       },
     },
-    '/usuarios/me/senha': {
+    '/users/me/password': {
       put: {
-        tags: ['Usuários'],
-        summary: 'Trocar a senha',
-        security: comLogin,
-        requestBody: corpo(ref('TrocaDeSenha'), { senha_atual: 'senha-forte-123', nova_senha: 'nova-senha-456' }),
-        responses: { 204: resposta('Senha alterada'), 400: dadosInvalidos, 401: semLogin },
-      },
-    },
-    '/categorias': {
-      get: {
-        tags: ['Categorias'],
-        summary: 'Listar categorias',
-        security: comLogin,
+        tags: ['Users'],
+        summary: 'Change the password',
+        security: signedIn,
+        requestBody: body(ref('PasswordChange'), { current_password: 'strong-password-123', new_password: 'new-password-456' }),
         responses: {
-          200: resposta('Categorias', { type: 'array', items: ref('Categoria') }),
-          401: semLogin,
+          204: response('Password changed'),
+          400: invalidData,
+          401: notSignedIn,
+          403: error('Not available in a demo account'),
         },
       },
     },
-    '/transacoes': {
+    '/categories': {
       get: {
-        tags: ['Transações'],
-        summary: 'Listar transações (com filtros e paginação)',
-        security: comLogin,
+        tags: ['Categories'],
+        summary: 'List categories',
+        security: signedIn,
+        responses: {
+          200: response('Categories', { type: 'array', items: ref('Category') }),
+          401: notSignedIn,
+        },
+      },
+    },
+    '/transactions': {
+      get: {
+        tags: ['Transactions'],
+        summary: 'List transactions (with filters and pagination)',
+        security: signedIn,
         parameters: [
-          { name: 'tipo', in: 'query', schema: { type: 'string', enum: ['entrada', 'saida'] } },
+          { name: 'type', in: 'query', schema: { type: 'string', enum: TYPES } },
           {
-            name: 'categoria_id',
+            name: 'category_id',
             in: 'query',
-            description: 'Uma ou mais categorias: ?categoria_id=1,4 ou ?categoria_id=1&categoria_id=4',
+            description: 'One or more categories: ?category_id=1,4 or ?category_id=1&category_id=4',
             schema: { type: 'string', example: '1,4' },
           },
-          ...parametrosDePeriodo,
-          { name: 'pagina', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
-          { name: 'limite', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
-          { name: 'ordem', in: 'query', description: 'Por data', schema: { type: 'string', enum: ['desc', 'asc'], default: 'desc' } },
+          ...periodParams,
+          { name: 'page', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
+          { name: 'order', in: 'query', description: 'By date', schema: { type: 'string', enum: ['desc', 'asc'], default: 'desc' } },
         ],
-        responses: { 200: resposta('Página de transações', ref('ListaDeTransacoes')), 400: dadosInvalidos, 401: semLogin },
+        responses: { 200: response('A page of transactions', ref('TransactionList')), 400: invalidData, 401: notSignedIn },
       },
       post: {
-        tags: ['Transações'],
-        summary: 'Cadastrar transação',
-        security: comLogin,
-        requestBody: corpo(ref('NovaTransacao'), exemploTransacao),
-        responses: { 201: resposta('Transação criada', ref('Transacao')), 400: dadosInvalidos, 401: semLogin },
+        tags: ['Transactions'],
+        summary: 'Create a transaction',
+        security: signedIn,
+        requestBody: body(ref('NewTransaction'), transactionExample),
+        responses: { 201: response('Transaction created', ref('Transaction')), 400: invalidData, 401: notSignedIn },
       },
     },
-    '/transacoes/extrato': {
+    '/transactions/statement': {
       get: {
-        tags: ['Transações'],
-        summary: 'Extrato: entradas, saídas, saldo e totais por categoria',
-        security: comLogin,
-        parameters: parametrosDePeriodo,
-        responses: { 200: resposta('Extrato', ref('Extrato')), 400: dadosInvalidos, 401: semLogin },
+        tags: ['Transactions'],
+        summary: 'Statement: income, expenses, balance and totals by category',
+        security: signedIn,
+        parameters: periodParams,
+        responses: { 200: response('Statement', ref('Statement')), 400: invalidData, 401: notSignedIn },
       },
     },
-    '/transacoes/resumo-mensal': {
+    '/transactions/monthly-summary': {
       get: {
-        tags: ['Transações'],
-        summary: 'Totais mês a mês de um ano (para gráficos)',
-        security: comLogin,
-        parameters: [{ name: 'ano', in: 'query', description: 'Padrão: ano atual', schema: { type: 'integer' } }],
-        responses: { 200: resposta('Resumo do ano', ref('ResumoMensal')), 400: dadosInvalidos, 401: semLogin },
+        tags: ['Transactions'],
+        summary: 'Month-by-month totals for a year (for charts)',
+        security: signedIn,
+        parameters: [{ name: 'year', in: 'query', description: 'Default: the current year', schema: { type: 'integer' } }],
+        responses: { 200: response('Summary of the year', ref('MonthlySummary')), 400: invalidData, 401: notSignedIn },
       },
     },
-    '/transacoes/{id}': {
-      parameters: [parametroId],
+    '/transactions/{id}': {
+      parameters: [idParam],
       get: {
-        tags: ['Transações'],
-        summary: 'Detalhar transação',
-        security: comLogin,
-        responses: { 200: resposta('Transação', ref('Transacao')), 401: semLogin, 404: erro('Transação não encontrada') },
+        tags: ['Transactions'],
+        summary: 'Get a transaction',
+        security: signedIn,
+        responses: { 200: response('Transaction', ref('Transaction')), 401: notSignedIn, 404: error('Transaction not found') },
       },
       put: {
-        tags: ['Transações'],
-        summary: 'Atualizar transação',
-        security: comLogin,
-        requestBody: corpo(ref('NovaTransacao'), exemploTransacao),
+        tags: ['Transactions'],
+        summary: 'Update a transaction',
+        security: signedIn,
+        requestBody: body(ref('NewTransaction'), transactionExample),
         responses: {
-          200: resposta('Transação atualizada', ref('Transacao')),
-          400: dadosInvalidos,
-          401: semLogin,
-          404: erro('Transação não encontrada'),
+          200: response('Transaction updated', ref('Transaction')),
+          400: invalidData,
+          401: notSignedIn,
+          404: error('Transaction not found'),
         },
       },
       delete: {
-        tags: ['Transações'],
-        summary: 'Excluir transação',
-        security: comLogin,
-        responses: { 204: resposta('Transação excluída'), 401: semLogin, 404: erro('Transação não encontrada') },
+        tags: ['Transactions'],
+        summary: 'Delete a transaction',
+        security: signedIn,
+        responses: { 204: response('Transaction deleted'), 401: notSignedIn, 404: error('Transaction not found') },
       },
     },
     '/health': {
       get: {
-        tags: ['Sistema'],
-        summary: 'Verificar se a API e o banco estão no ar',
+        tags: ['System'],
+        summary: 'Check that the API and the database are up',
         responses: {
-          200: resposta('Tudo certo', { type: 'object', properties: { status: { type: 'string', example: 'ok' } } }),
-          503: resposta('Banco de dados indisponível'),
+          200: response('All good', { type: 'object', properties: { status: { type: 'string', example: 'ok' } } }),
+          503: response('Database unavailable'),
         },
       },
     },
