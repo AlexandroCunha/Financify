@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="https://i.imgur.com/8Yv5svw.png" alt="Financify" width="640">
-</p>
+<h1 align="center">Financify</h1>
 
 <h3 align="center">Saiba para onde vai o seu dinheiro.</h3>
 
@@ -43,7 +41,11 @@
   <br><br>
   <img src="docs/screenshots/nova-transacao.png" alt="Formulário de nova transação com a escolha entre saída e entrada e as categorias em botões" width="760">
   <br><br>
+  <img src="docs/screenshots/excluir.png" alt="Confirmação antes de excluir uma transação, com o nome e o valor dela" width="760">
+  <br><br>
   <img src="docs/screenshots/entrar.png" alt="Tela de entrada com o botão Ver demonstração" width="760">
+  <br><br>
+  <img src="docs/screenshots/demonstracao.png" alt="Painel numa conta de demonstração, com a faixa para criar uma conta de verdade" width="760">
   <br><br>
   <img src="docs/screenshots/painel-escuro.png" alt="Painel no modo escuro" width="760">
   <br><br>
